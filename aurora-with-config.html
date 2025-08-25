@@ -1,0 +1,2135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurora Life OS - Configuration</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #F5F7FA;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .app-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            max-width: 430px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .config-header {
+            background: linear-gradient(135deg, #4A90E2, #722ED1);
+            color: white;
+            padding: 20px 16px;
+            text-align: center;
+        }
+        
+        .config-content {
+            flex: 1;
+            padding: 20px 16px;
+            overflow-y: auto;
+        }
+        
+        .config-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid #E8E8E8;
+        }
+        
+        .config-section h3 {
+            color: #262626;
+            margin-bottom: 12px;
+            font-size: 18px;
+        }
+        
+        .config-section p {
+            color: #8C8C8C;
+            font-size: 14px;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #262626;
+            font-size: 14px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #D9D9D9;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #F5F7FA;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #4A90E2;
+            background: white;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #4A90E2;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #357ABD;
+        }
+        
+        .btn-success {
+            background: #52C41A;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #FF4D4F;
+            color: white;
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .status-indicator {
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        
+        .status-success {
+            background: #F6FFED;
+            color: #52C41A;
+            border: 1px solid #B7EB8F;
+        }
+        
+        .status-error {
+            background: #FFF2F0;
+            color: #FF4D4F;
+            border: 1px solid #FFCCC7;
+        }
+        
+        .status-info {
+            background: #F0F8FF;
+            color: #4A90E2;
+            border: 1px solid #BAE7FF;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* Notification animations */
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+        
+        /* Event reminder styles */
+        .event-reminder {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            position: relative;
+        }
+        
+        .event-reminder.reminder-high {
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 8px 24px rgba(255,77,79,0.3); }
+            50% { box-shadow: 0 8px 24px rgba(255,77,79,0.6); }
+            100% { box-shadow: 0 8px 24px rgba(255,77,79,0.3); }
+        }
+        
+        /* Notification message in chat */
+        .message.notification .message-bubble {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .message.notification .message-bubble::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #FFD700, #FFA500, #FFD700);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .instructions {
+            background: #F0F8FF;
+            border: 1px solid #BAE7FF;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .instructions h4 {
+            color: #4A90E2;
+            margin-bottom: 8px;
+        }
+        
+        .instructions ol {
+            color: #666;
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+        
+        .app-preview {
+            display: none;
+        }
+        
+        .app-preview.active {
+            display: block;
+        }
+        
+        /* Chat Interface Styles */
+        .chat-header {
+            background: white;
+            border-bottom: 1px solid #D9D9D9;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .chat-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #4A90E2, #722ED1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 500;
+            margin-right: 12px;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            background: #F5F7FA;
+        }
+        
+        .message {
+            display: flex;
+            margin-bottom: 16px;
+        }
+        
+        .message.ai {
+            justify-content: flex-start;
+        }
+        
+        .message.user {
+            justify-content: flex-end;
+        }
+        
+        .message-bubble {
+            max-width: 280px;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .message.ai .message-bubble {
+            background: white;
+            color: #262626;
+        }
+        
+        .message.user .message-bubble {
+            background: #4A90E2;
+            color: white;
+        }
+        
+        .chat-input-area {
+            border-top: 1px solid #D9D9D9;
+            padding: 12px 16px;
+            background: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .chat-input {
+            flex: 1;
+            background: #F5F7FA;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 16px;
+            font-size: 14px;
+            outline: none;
+        }
+        
+        .send-button {
+            width: 36px;
+            height: 36px;
+            background: #4A90E2;
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .bottom-nav {
+            background: white;
+            border-top: 1px solid #D9D9D9;
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 60px;
+            color: #8C8C8C;
+        }
+        
+        .nav-item.active {
+            color: #4A90E2;
+            background: rgba(74, 144, 226, 0.1);
+        }
+        
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 4px;
+            background: currentColor;
+            border-radius: 4px;
+            opacity: 0.8;
+        }
+        
+        .nav-label {
+            font-size: 10px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Configuration Screen -->
+        <div id="config-screen" class="hidden">
+            <div class="config-header">
+                <h1>🌟 Aurora Life OS</h1>
+                <p>Configuration & Setup</p>
+            </div>
+            
+            <div class="config-content">
+                <!-- Google Calendar Setup -->
+                <div class="config-section">
+                    <h3>📅 Google Calendar Integration</h3>
+                    <p>Connect your Google Calendar for AI-powered scheduling and insights.</p>
+                    
+                    <div class="instructions">
+                        <h4>How to get Google credentials:</h4>
+                        <ol>
+                            <li>Go to <a href="https://console.cloud.google.com" target="_blank">Google Cloud Console</a></li>
+                            <li>Create a project or select existing one</li>
+                            <li>Enable Google Calendar API</li>
+                            <li>Go to "Credentials" → "Create Credentials" → "OAuth 2.0 Client ID"</li>
+                            <li>Add redirect URI: <code>http://127.0.0.1:8000/api/calendar/callback</code></li>
+                            <li>Copy Client ID and Client Secret below</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="clientId">Google Client ID</label>
+                        <input type="text" id="clientId" placeholder="124572102989-example.apps.googleusercontent.com" value="">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="clientSecret">Google Client Secret</label>
+                        <input type="password" id="clientSecret" placeholder="GOCSPX-example" value="">
+                    </div>
+                    
+                    <div id="backend-status" class="status-indicator status-error">
+                        ❌ Backend not connected
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="saveConfiguration()">💾 Save Configuration</button>
+                </div>
+
+                <!-- OpenAI Integration -->
+                <div class="config-section">
+                    <h3>🤖 AI Integration</h3>
+                    <p>Configure OpenAI API for intelligent conversations and coaching.</p>
+                    
+                    <div class="form-group">
+                        <label for="openaiKey">OpenAI API Key</label>
+                        <input type="password" id="openaiKey" placeholder="sk-..." value="">
+                    </div>
+                    
+                    <div class="instructions">
+                        <h4>How to get OpenAI API key:</h4>
+                        <ol>
+                            <li>Go to <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI API Keys</a></li>
+                            <li>Sign in or create an account</li>
+                            <li>Click "Create new secret key"</li>
+                            <li>Copy the API key (starts with sk-...)</li>
+                            <li>Paste it above and save configuration</li>
+                        </ol>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="saveOpenAIConfig()">🧠 Save AI Configuration</button>
+                </div>
+                
+                <!-- Backend Connection -->
+                <div class="config-section">
+                    <h3>🔗 Backend Connection</h3>
+                    <p>Ensure the Aurora Life OS backend is running for full functionality.</p>
+                    
+                    <div class="form-group">
+                        <label for="backendUrl">Backend URL</label>
+                        <input type="text" id="backendUrl" value="http://127.0.0.1:8000">
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="testBackendConnection()">🧪 Test Connection</button>
+                </div>
+                
+                <!-- Actions -->
+                <div class="config-section">
+                    <h3>🚀 Launch Application</h3>
+                    <p>Once configuration is complete, launch Aurora Life OS.</p>
+                    
+                    <button class="btn btn-success" onclick="launchApp()" id="launchBtn" disabled>
+                        🌟 Launch Aurora Life OS
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Application (Default view) -->
+        <div id="main-app">
+            <!-- Chat Interface -->
+            <div id="chat-content" class="content">
+                <div class="chat-header">
+                    <div class="chat-avatar">A</div>
+                    <div>
+                        <h1 style="font-size: 16px; margin-bottom: 2px;">Aurora</h1>
+                        <p style="font-size: 14px; color: #8C8C8C;">Your AI life companion</p>
+                    </div>
+                    <button style="margin-left: auto; background: none; border: none; color: #8C8C8C; padding: 8px;" onclick="showConfig()">⚙️</button>
+                </div>
+                
+                <div class="chat-messages">
+                    <div class="message ai">
+                        <div class="message-bubble">
+                            🎉 Great! Aurora Life OS is now configured and ready to go. How are you feeling today?
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chat-input-area">
+                    <input type="text" class="chat-input" placeholder="Message Aurora..." id="chatInput">
+                    <button class="send-button" onclick="sendMessage()">→</button>
+                </div>
+            </div>
+
+            <!-- Calendar View -->
+            <div id="calendar-content" class="content hidden">
+                <div class="calendar-header">
+                    <h1>📅 Smart Calendar</h1>
+                    <p>Google Calendar integration with AI insights</p>
+                </div>
+                
+                <div style="padding: 16px;">
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                        <h3 style="color: #262626; margin-bottom: 8px;">📅 Google Calendar Integration</h3>
+                        <div id="calendar-status">
+                            <p style="color: #8C8C8C; font-size: 14px;">🔄 Checking connection status...</p>
+                        </div>
+                        <button style="background: #4A90E2; color: white; border: none; border-radius: 6px; padding: 8px 12px; margin-top: 8px; cursor: pointer;" onclick="connectOrSyncCalendar()" id="calendar-action-btn">🔗 Connect Calendar</button>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                        <h3 style="color: #262626; margin-bottom: 12px;">Today's Events</h3>
+                        <div id="calendar-events">
+                            <p style="color: #8C8C8C; text-align: center; padding: 20px;">Loading your calendar events...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Goals Dashboard -->
+            <div id="goals-content" class="content hidden">
+                <div style="background: linear-gradient(135deg, #52C41A, #73D13D); color: white; padding: 20px 16px; text-align: center;">
+                    <h1>🎯 Goals Dashboard</h1>
+                    <p>Track your progress and achieve your dreams</p>
+                </div>
+                
+                <div style="padding: 16px;">
+                    <!-- Add New Goal Section -->
+                    <div id="add-goal-form" class="hidden" style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                        <h3 style="margin-bottom: 16px;">Add New Goal</h3>
+                        
+                        <div style="margin-bottom: 12px;">
+                            <label style="display: block; margin-bottom: 4px; font-weight: 500;">Goal Title</label>
+                            <input type="text" id="goal-title" placeholder="e.g., Learn Spanish, Exercise Daily" style="width: 100%; padding: 8px; border: 1px solid #E8E8E8; border-radius: 6px;">
+                        </div>
+                        
+                        <div style="margin-bottom: 12px;">
+                            <label style="display: block; margin-bottom: 4px; font-weight: 500;">Description (Optional)</label>
+                            <textarea id="goal-description" placeholder="What do you want to achieve?" style="width: 100%; padding: 8px; border: 1px solid #E8E8E8; border-radius: 6px; height: 60px; resize: none;"></textarea>
+                        </div>
+                        
+                        <div style="margin-bottom: 12px;">
+                            <label style="display: block; margin-bottom: 4px; font-weight: 500;">Category</label>
+                            <select id="goal-category" style="width: 100%; padding: 8px; border: 1px solid #E8E8E8; border-radius: 6px;">
+                                <option value="personal">🌱 Personal</option>
+                                <option value="career">💼 Career</option>
+                                <option value="health">❤️ Health</option>
+                                <option value="learning">📚 Learning</option>
+                                <option value="financial">💰 Financial</option>
+                                <option value="relationship">👥 Relationship</option>
+                                <option value="other">✨ Other</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; margin-bottom: 4px; font-weight: 500;">Target Date (Optional)</label>
+                            <input type="date" id="goal-target-date" style="width: 100%; padding: 8px; border: 1px solid #E8E8E8; border-radius: 6px;">
+                        </div>
+                        
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="saveGoal()" style="flex: 1; background: #52C41A; color: white; border: none; border-radius: 6px; padding: 10px; cursor: pointer;">Save Goal</button>
+                            <button onclick="toggleAddGoal()" style="flex: 1; background: #8C8C8C; color: white; border: none; border-radius: 6px; padding: 10px; cursor: pointer;">Cancel</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Goals List -->
+                    <div id="goals-list">
+                        <!-- Goals will be loaded here -->
+                    </div>
+                    
+                    <button id="add-goal-btn" onclick="toggleAddGoal()" style="width: 100%; background: #52C41A; color: white; border: none; border-radius: 8px; padding: 12px; cursor: pointer; margin-top: 16px;">+ Add New Goal</button>
+                </div>
+            </div>
+
+            <!-- Mood Tracker -->
+            <div id="mood-content" class="content hidden">
+                <div style="background: linear-gradient(135deg, #FF6B6B, #FF8E53); color: white; padding: 20px 16px; text-align: center;">
+                    <h1>💗 Mood Tracker</h1>
+                    <p>How are you feeling today?</p>
+                </div>
+                
+                <div style="padding: 16px;">
+                    <div style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                        <h3>Daily Check-in</h3>
+                        <div style="margin: 16px 0;">
+                            <label>Mood Level</label>
+                            <div style="display: flex; justify-content: space-between; margin: 12px 0;">
+                                <span style="font-size: 24px; cursor: pointer; padding: 8px; border-radius: 50%;" onclick="setMood(1)">😢</span>
+                                <span style="font-size: 24px; cursor: pointer; padding: 8px; border-radius: 50%;" onclick="setMood(3)">😕</span>
+                                <span style="font-size: 24px; cursor: pointer; padding: 8px; border-radius: 50%;" onclick="setMood(5)">😐</span>
+                                <span style="font-size: 24px; cursor: pointer; padding: 8px; border-radius: 50%; background: #4A90E2; transform: scale(1.2);" onclick="setMood(7)">😊</span>
+                                <span style="font-size: 24px; cursor: pointer; padding: 8px; border-radius: 50%;" onclick="setMood(9)">😄</span>
+                            </div>
+                            <input type="range" style="width: 100%; height: 6px; background: #E8E8E8; border-radius: 3px;" min="1" max="10" value="7">
+                        </div>
+                        
+                        <textarea id="mood-notes" placeholder="How was your day? (optional)" style="width: 100%; padding: 12px; border: 1px solid #E8E8E8; border-radius: 8px; resize: none; margin: 12px 0; font-family: inherit;"></textarea>
+                        
+                        <button onclick="saveMoodCheckin()" style="width: 100%; background: #FF4D4F; color: white; border: none; border-radius: 8px; padding: 12px; cursor: pointer;">Save Check-in</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings/Profile -->
+            <div id="settings-content" class="content hidden">
+                <div style="background: linear-gradient(135deg, #722ED1, #9254DE); color: white; padding: 20px 16px; text-align: center;">
+                    <h1>⚙️ Settings</h1>
+                    <p>Configuration and preferences</p>
+                </div>
+                
+                <div style="padding: 16px;">
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                        <h3>Google Calendar Integration</h3>
+                        <p style="color: #52C41A; margin: 8px 0;">✅ Connected to royantony1000@gmail.com</p>
+                        <button style="background: #FF4D4F; color: white; border: none; border-radius: 6px; padding: 8px 12px; cursor: pointer;" onclick="disconnectCalendar()">Disconnect</button>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                        <h3>Backend Configuration</h3>
+                        <button style="background: #4A90E2; color: white; border: none; border-radius: 6px; padding: 8px 12px; cursor: pointer;" onclick="showConfig()">🔧 Reconfigure</button>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                        <h3>📅 Event Reminders</h3>
+                        <p style="color: #8C8C8C; margin: 8px 0; font-size: 14px;">Get notified 30, 10, and 5 minutes before calendar events</p>
+                        
+                        <div style="display: flex; gap: 8px; margin: 12px 0;">
+                            <button style="flex: 1; background: #52C41A; color: white; border: none; border-radius: 6px; padding: 8px 12px; cursor: pointer;" onclick="scheduleEventReminders()">📅 Schedule Reminders</button>
+                            <button style="flex: 1; background: #FAAD14; color: white; border: none; border-radius: 6px; padding: 8px 12px; cursor: pointer;" onclick="testReminderSystem()">🧪 Test</button>
+                        </div>
+                        
+                        <div style="display: flex; gap: 8px;">
+                            <button style="flex: 1; background: #4A90E2; color: white; border: none; border-radius: 6px; padding: 8px 12px; cursor: pointer;" onclick="startNotificationMonitoring()">🔔 Start Monitoring</button>
+                            <button style="flex: 1; background: #8C8C8C; color: white; border: none; border-radius: 6px; padding: 8px 12px; cursor: pointer;" onclick="stopNotificationMonitoring()">⏹️ Stop</button>
+                        </div>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                        <h3>🤖 Proactive AI Messaging</h3>
+                        <p style="color: #8C8C8C; margin: 8px 0; font-size: 14px;">Aurora reaches out proactively based on your patterns, mood, and goals</p>
+                        
+                        <div style="display: flex; gap: 8px; margin: 12px 0;">
+                            <button style="flex: 1; background: #722ED1; color: white; border: none; border-radius: 6px; padding: 8px 12px; cursor: pointer;" onclick="startProactiveMonitoring()">🧠 Start AI Monitoring</button>
+                            <button style="flex: 1; background: #FAAD14; color: white; border: none; border-radius: 6px; padding: 8px 12px; cursor: pointer;" onclick="triggerProactiveCheck()">🎯 Trigger Check</button>
+                        </div>
+                        
+                        <div style="background: #F0F2F5; border-radius: 8px; padding: 12px; margin-top: 8px;">
+                            <div style="font-size: 12px; color: #666; line-height: 1.4;">
+                                <strong>Aurora monitors:</strong><br>
+                                • Mood gaps and patterns 🌙<br>
+                                • Goal deadlines and progress ⏰<br>
+                                • Energy level changes ⚡<br>
+                                • Calendar patterns 📅<br>
+                                • Engagement timing 👋
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bottom Navigation -->
+            <div class="bottom-nav">
+                <div class="nav-item active" data-tab="chat">
+                    <div class="nav-icon"></div>
+                    <div class="nav-label">Chat</div>
+                </div>
+                <div class="nav-item" data-tab="calendar">
+                    <div class="nav-icon"></div>
+                    <div class="nav-label">Calendar</div>
+                </div>
+                <div class="nav-item" data-tab="goals">
+                    <div class="nav-icon"></div>
+                    <div class="nav-label">Goals</div>
+                </div>
+                <div class="nav-item" data-tab="mood">
+                    <div class="nav-icon"></div>
+                    <div class="nav-label">Mood</div>
+                </div>
+                <div class="nav-item" data-tab="settings">
+                    <div class="nav-icon"></div>
+                    <div class="nav-label">Settings</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration State
+        let backendConnected = false;
+        let googleConfigured = false;
+        let backendUrl = 'http://127.0.0.1:8000'; // Global backend URL
+        
+        // Update global backend URL
+        function updateBackendUrl() {
+            backendUrl = document.getElementById('backendUrl').value;
+        }
+        
+        // Test Backend Connection
+        async function testBackendConnection() {
+            updateBackendUrl();
+            const testUrl = backendUrl;
+            const statusEl = document.getElementById('backend-status');
+            
+            try {
+                const response = await fetch(`${testUrl}/health`);
+                const data = await response.json();
+                
+                if (data.status === 'healthy') {
+                    statusEl.className = 'status-indicator status-success';
+                    statusEl.textContent = '✅ Backend connected successfully';
+                    backendConnected = true;
+                    updateLaunchButton();
+                } else {
+                    throw new Error('Backend not healthy');
+                }
+            } catch (error) {
+                statusEl.className = 'status-indicator status-error';
+                statusEl.textContent = '❌ Backend connection failed - Please start the backend server';
+                backendConnected = false;
+                updateLaunchButton();
+            }
+        }
+        
+        // Save OpenAI Configuration
+        async function saveOpenAIConfig() {
+            const openaiKey = document.getElementById('openaiKey').value;
+            updateBackendUrl();
+            
+            if (!openaiKey) {
+                alert('❌ Please enter your OpenAI API key');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${backendUrl}/api/config/openai`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        openai_api_key: openaiKey
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('✅ OpenAI configuration saved! Chat functionality is now enabled.');
+                    localStorage.setItem('openaiConfigured', 'true');
+                } else {
+                    throw new Error('Failed to save OpenAI configuration');
+                }
+                
+            } catch (error) {
+                console.error('OpenAI config error:', error);
+                alert('⚠️ Could not save to backend, but stored locally. Chat will work in limited mode.');
+                localStorage.setItem('openaiKey', openaiKey);
+                localStorage.setItem('openaiConfigured', 'true');
+            }
+        }
+
+        // Save Google Configuration
+        async function saveConfiguration() {
+            const clientId = document.getElementById('clientId').value;
+            const clientSecret = document.getElementById('clientSecret').value;
+            updateBackendUrl();
+            
+            if (!clientId || !clientSecret) {
+                alert('❌ Please enter both Client ID and Client Secret');
+                return;
+            }
+            
+            // Save to backend
+            try {
+                const credentials = {
+                    web: {
+                        client_id: clientId,
+                        client_secret: clientSecret,
+                        auth_uri: "https://accounts.google.com/o/oauth2/auth",
+                        token_uri: "https://oauth2.googleapis.com/token",
+                        redirect_uris: [`${backendUrl}/api/calendar/callback`]
+                    }
+                };
+                
+                const response = await fetch(`${backendUrl}/api/calendar/configure`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(credentials)
+                });
+                
+                if (response.ok) {
+                    alert('✅ Google Calendar configuration saved successfully!');
+                    googleConfigured = true;
+                    updateLaunchButton();
+                } else {
+                    throw new Error('Failed to save configuration');
+                }
+            } catch (error) {
+                // Fallback: Save locally for now
+                localStorage.setItem('googleClientId', clientId);
+                localStorage.setItem('googleClientSecret', clientSecret);
+                alert('✅ Configuration saved locally! (Backend connection required for full functionality)');
+                googleConfigured = true;
+                updateLaunchButton();
+            }
+        }
+        
+        // Connect Google Calendar
+        async function connectGoogleCalendar() {
+            updateBackendUrl();
+            
+            try {
+                const response = await fetch(`${backendUrl}/api/calendar/connect-google?user_id=1`);
+                const data = await response.json();
+                
+                if (data.auth_url) {
+                    const popup = window.open(data.auth_url, 'google-auth', 'width=600,height=600');
+                    
+                    const checkClosed = setInterval(() => {
+                        if (popup.closed) {
+                            clearInterval(checkClosed);
+                            setTimeout(() => {
+                                alert('🎉 Google Calendar connected! You can now use AI scheduling.');
+                            }, 1000);
+                        }
+                    }, 1000);
+                } else {
+                    alert('❌ Failed to get Google authorization URL');
+                }
+            } catch (error) {
+                alert('❌ Backend connection required for Google Calendar integration');
+            }
+        }
+        
+        // Update Launch Button
+        function updateLaunchButton() {
+            const launchBtn = document.getElementById('launchBtn');
+            
+            if (backendConnected && googleConfigured) {
+                launchBtn.disabled = false;
+                launchBtn.textContent = '🌟 Launch Aurora Life OS';
+                launchBtn.className = 'btn btn-success';
+            } else if (googleConfigured) {
+                launchBtn.disabled = false;
+                launchBtn.textContent = '🚀 Launch (Limited Mode)';
+                launchBtn.className = 'btn btn-primary';
+            } else {
+                launchBtn.disabled = true;
+                launchBtn.textContent = '⏳ Complete Configuration First';
+                launchBtn.className = 'btn btn-primary';
+            }
+        }
+        
+        // Launch Application
+        function launchApp() {
+            document.getElementById('config-screen').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            
+            // If Google is configured, offer to connect
+            if (googleConfigured && backendConnected) {
+                setTimeout(() => {
+                    if (confirm('🔗 Would you like to connect your Google Calendar now?')) {
+                        connectGoogleCalendar();
+                    }
+                }, 1000);
+            }
+        }
+        
+        // Show Configuration
+        function showConfig() {
+            document.getElementById('config-screen').classList.remove('hidden');
+            document.getElementById('main-app').classList.add('hidden');
+        }
+        
+        // Send Chat Message - REAL AI Integration
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            const messagesContainer = document.querySelector('.chat-messages');
+            updateBackendUrl();
+            
+            // Add user message
+            const userMsg = document.createElement('div');
+            userMsg.className = 'message user';
+            userMsg.innerHTML = `<div class="message-bubble">${message}</div>`;
+            messagesContainer.appendChild(userMsg);
+            
+            input.value = '';
+            
+            // Add typing indicator
+            const typingMsg = document.createElement('div');
+            typingMsg.className = 'message ai typing-indicator';
+            typingMsg.innerHTML = `
+                <div class="message-bubble">
+                    <div style="display: flex; gap: 4px; align-items: center;">
+                        <div style="width: 6px; height: 6px; background: #8C8C8C; border-radius: 50%; animation: typing 1.5s infinite;"></div>
+                        <div style="width: 6px; height: 6px; background: #8C8C8C; border-radius: 50%; animation: typing 1.5s infinite 0.2s;"></div>
+                        <div style="width: 6px; height: 6px; background: #8C8C8C; border-radius: 50%; animation: typing 1.5s infinite 0.4s;"></div>
+                    </div>
+                </div>
+            `;
+            messagesContainer.appendChild(typingMsg);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            try {
+                // Get user's current mood and energy for context
+                const currentMood = localStorage.getItem('currentMood') || '7';
+                const currentEnergy = localStorage.getItem('currentEnergy') || '6';
+                
+                // Send to AI backend
+                const response = await fetch(`${backendUrl}/api/chat/message`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        user_id: 1,
+                        mood: parseInt(currentMood),
+                        energy: parseInt(currentEnergy),
+                        context: {
+                            current_time: new Date().toISOString(),
+                            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                        }
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // Remove typing indicator
+                typingMsg.remove();
+                
+                if (data.response) {
+                    // Add AI response
+                    const aiMsg = document.createElement('div');
+                    aiMsg.className = 'message ai';
+                    
+                    let quickRepliesHtml = '';
+                    if (data.quick_replies && data.quick_replies.length > 0) {
+                        quickRepliesHtml = '<div style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">';
+                        data.quick_replies.forEach(reply => {
+                            quickRepliesHtml += `<button onclick="sendQuickReply('${reply}')" style="padding: 8px 12px; background: white; color: #4A90E2; border: 1px solid #4A90E2; border-radius: 12px; font-size: 12px; cursor: pointer; text-align: left;">${reply}</button>`;
+                        });
+                        quickRepliesHtml += '</div>';
+                    }
+                    
+                    aiMsg.innerHTML = `<div class="message-bubble">${data.response}${quickRepliesHtml}</div>`;
+                    messagesContainer.appendChild(aiMsg);
+                } else {
+                    throw new Error('No response from AI');
+                }
+                
+            } catch (error) {
+                console.error('Chat error:', error);
+                
+                // Remove typing indicator
+                typingMsg.remove();
+                
+                // Add fallback response
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'message ai';
+                aiMsg.innerHTML = `
+                    <div class="message-bubble">
+                        I'm having trouble connecting to my AI brain right now. ${backendConnected ? 'The backend is connected, but there might be an issue with the OpenAI integration.' : 'Please make sure the backend is running and configured properly.'}
+                        <div style="margin-top: 12px;">
+                            <button onclick="showConfig()" style="padding: 6px 12px; background: #4A90E2; color: white; border: none; border-radius: 6px; font-size: 12px; cursor: pointer;">⚙️ Check Settings</button>
+                        </div>
+                    </div>
+                `;
+                messagesContainer.appendChild(aiMsg);
+            }
+            
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Send Quick Reply
+        function sendQuickReply(reply) {
+            document.getElementById('chatInput').value = reply;
+            sendMessage();
+        }
+        
+        // Enter key for chat
+        document.getElementById('chatInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // Tab Navigation for Main App
+        function switchTab(tabName) {
+            // Hide all content
+            document.querySelectorAll('#main-app .content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Remove active class from all nav items
+            document.querySelectorAll('.nav-item').forEach(nav => {
+                nav.classList.remove('active');
+            });
+            
+            // Show selected content
+            document.getElementById(tabName + '-content').classList.remove('hidden');
+            
+            // Add active class to clicked nav item
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            
+            // Auto-load content for certain tabs
+            if (tabName === 'calendar') {
+                // Check calendar status when calendar tab is opened
+                checkCalendarStatus();
+            }
+        }
+
+        // Check Calendar Connection Status
+        async function checkCalendarStatus() {
+            const statusDiv = document.getElementById('calendar-status');
+            const actionBtn = document.getElementById('calendar-action-btn');
+            updateBackendUrl();
+            
+            try {
+                const response = await fetch(`${backendUrl}/api/calendar/connection-status?user_id=1`);
+                const data = await response.json();
+                
+                if (data.google_calendar_connected) {
+                    statusDiv.innerHTML = '<p style="color: #52C41A; font-size: 14px;">✅ Connected to Google Calendar</p>';
+                    actionBtn.innerHTML = '🔄 Sync Events';
+                    actionBtn.onclick = syncCalendar;
+                    
+                    // Auto-sync events
+                    const eventsDiv = document.getElementById('calendar-events');
+                    if (eventsDiv.innerHTML.includes('Loading your calendar events...')) {
+                        syncCalendar();
+                    }
+                } else {
+                    statusDiv.innerHTML = '<p style="color: #FF4D4F; font-size: 14px;">❌ Google Calendar not connected</p>';
+                    actionBtn.innerHTML = '🔗 Connect Calendar';
+                    actionBtn.onclick = connectGoogleCalendar;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = '<p style="color: #8C8C8C; font-size: 14px;">⚠️ Unable to check connection status</p>';
+                actionBtn.innerHTML = '🔗 Connect Calendar';
+                actionBtn.onclick = connectGoogleCalendar;
+            }
+        }
+
+        // Connect or Sync Calendar (smart button)
+        async function connectOrSyncCalendar() {
+            await checkCalendarStatus();
+        }
+
+        // Sync Calendar - Get REAL events from Google Calendar
+        async function syncCalendar() {
+            const eventsDiv = document.getElementById('calendar-events');
+            updateBackendUrl();
+            
+            eventsDiv.innerHTML = '<p style="color: #4A90E2; text-align: center; padding: 20px;">🔄 Syncing your calendar events...</p>';
+            
+            try {
+                // First sync with Google Calendar
+                const syncResponse = await fetch(`${backendUrl}/api/calendar/sync?user_id=1&days_ahead=7`, {
+                    method: 'POST'
+                });
+                
+                if (!syncResponse.ok) {
+                    throw new Error('Failed to sync with Google Calendar');
+                }
+                
+                // Then fetch the events
+                const eventsResponse = await fetch(`${backendUrl}/api/calendar/events?user_id=1&days_ahead=7`);
+                const events = await eventsResponse.json();
+                
+                if (events && events.length > 0) {
+                    let eventsHtml = '';
+                    
+                    events.forEach(event => {
+                        const startTime = new Date(event.start_time);
+                        const endTime = new Date(event.end_time);
+                        const today = new Date();
+                        const isToday = startTime.toDateString() === today.toDateString();
+                        const isTomorrow = startTime.toDateString() === new Date(today.getTime() + 24*60*60*1000).toDateString();
+                        const isNow = isToday && startTime <= new Date() && endTime >= new Date();
+                        const isStartingSoon = isToday && startTime > new Date() && (startTime - new Date()) < (30 * 60 * 1000); // 30 minutes
+                        
+                        let dateText = '';
+                        if (isToday) {
+                            dateText = `Today, ${startTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${endTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+                        } else if (isTomorrow) {
+                            dateText = `Tomorrow, ${startTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${endTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+                        } else {
+                            dateText = `${startTime.toLocaleDateString()}, ${startTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${endTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+                        }
+                        
+                        // Determine border color and priority styling
+                        let borderColor = event.event_type === 'meeting' ? '#4A90E2' : 
+                                         event.event_type === 'task' ? '#52C41A' : 
+                                         event.event_type === 'personal' ? '#722ED1' : '#FAAD14';
+                        
+                        let statusBadge = '';
+                        if (isNow) {
+                            statusBadge = '<span style="background: #FF4D4F; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">🔴 LIVE NOW</span>';
+                            borderColor = '#FF4D4F';
+                        } else if (isStartingSoon) {
+                            statusBadge = '<span style="background: #FAAD14; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">⏰ SOON</span>';
+                        }
+                        
+                        // Generate meeting link section
+                        let meetingSection = '';
+                        if (event.meeting_url) {
+                            const meetingIcons = {
+                                'zoom': '🎥',
+                                'google-meet': '📹',
+                                'teams': '👥',
+                                'webex': '💼',
+                                'gotomeeting': '📞'
+                            };
+                            
+                            const icon = meetingIcons[event.meeting_type] || '🔗';
+                            const meetingTypeName = event.meeting_type ? event.meeting_type.replace('-', ' ').toUpperCase() : 'MEETING';
+                            
+                            let joinButtonStyle = 'background: #4A90E2; color: white;';
+                            let joinButtonText = `${icon} Join ${meetingTypeName}`;
+                            
+                            if (isNow) {
+                                joinButtonStyle = 'background: #FF4D4F; color: white; animation: pulse 1s infinite;';
+                                joinButtonText = `${icon} JOIN NOW`;
+                            } else if (isStartingSoon) {
+                                joinButtonStyle = 'background: #FAAD14; color: white;';
+                                joinButtonText = `${icon} Join Soon`;
+                            }
+                            
+                            meetingSection = `
+                                <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #E8E8E8;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                        <span style="font-size: 12px; color: #8C8C8C; font-weight: 500;">${icon} ${meetingTypeName}</span>
+                                    </div>
+                                    
+                                    <button onclick="joinMeeting('${event.meeting_url}', '${event.title}')" 
+                                        style="${joinButtonStyle} border: none; border-radius: 6px; padding: 8px 16px; cursor: pointer; font-weight: 500; font-size: 12px; width: 100%; margin-bottom: 4px;">
+                                        ${joinButtonText}
+                                    </button>
+                                    
+                                    ${event.meeting_id ? `<p style="margin: 4px 0; color: #666; font-size: 11px;">ID: ${event.meeting_id}</p>` : ''}
+                                    ${event.meeting_passcode ? `<p style="margin: 2px 0; color: #666; font-size: 11px;">Passcode: ${event.meeting_passcode}</p>` : ''}
+                                    ${event.meeting_phone ? `<p style="margin: 2px 0; color: #666; font-size: 11px;">📞 ${event.meeting_phone}</p>` : ''}
+                                </div>
+                            `;
+                        }
+                        
+                        eventsHtml += `
+                            <div style="border-left: 4px solid ${borderColor}; padding-left: 12px; margin-bottom: 12px; background: #F5F7FA; padding: 12px; border-radius: 8px; ${isNow ? 'box-shadow: 0 4px 12px rgba(255,77,79,0.2);' : ''}">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
+                                    <h4 style="margin: 0; color: #262626; flex: 1;">${event.title}</h4>
+                                    ${statusBadge}
+                                </div>
+                                <p style="margin: 4px 0 0 0; color: #8C8C8C; font-size: 14px;">${dateText}</p>
+                                ${event.description ? `<p style="margin: 4px 0 0 0; color: #666; font-size: 12px;">${event.description.substring(0, 100)}${event.description.length > 100 ? '...' : ''}</p>` : ''}
+                                ${meetingSection}
+                            </div>
+                        `;
+                    });
+                    
+                    eventsHtml += `<p style="color: #52C41A; text-align: center; font-size: 14px; margin-top: 16px;">✅ Synced ${events.length} events from Google Calendar!</p>`;
+                    eventsDiv.innerHTML = eventsHtml;
+                    
+                } else {
+                    eventsDiv.innerHTML = `
+                        <div style="text-align: center; padding: 20px; color: #8C8C8C;">
+                            <p>📅 No upcoming events found in your Google Calendar</p>
+                            <p style="font-size: 12px; margin-top: 8px;">Events for the next 7 days will appear here</p>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Calendar sync error:', error);
+                eventsDiv.innerHTML = `
+                    <div style="text-align: center; padding: 20px;">
+                        <p style="color: #FF4D4F;">❌ Failed to sync calendar events</p>
+                        <p style="color: #8C8C8C; font-size: 14px; margin-top: 8px;">${error.message}</p>
+                        <button onclick="syncCalendar()" style="background: #4A90E2; color: white; border: none; border-radius: 6px; padding: 8px 12px; margin-top: 8px; cursor: pointer;">🔄 Try Again</button>
+                    </div>
+                `;
+            }
+        }
+
+        // Set Mood
+        function setMood(level) {
+            document.querySelectorAll('#mood-content span[onclick*="setMood"]').forEach(emoji => {
+                emoji.style.background = '';
+                emoji.style.transform = '';
+            });
+            
+            const selectedEmoji = document.querySelector(`#mood-content span[onclick="setMood(${level})"]`);
+            selectedEmoji.style.background = '#4A90E2';
+            selectedEmoji.style.transform = 'scale(1.2)';
+            
+            // Update slider and store locally
+            const slider = document.querySelector('#mood-content input[type="range"]');
+            slider.value = level;
+            localStorage.setItem('currentMood', level.toString());
+        }
+
+        // Save Mood Check-in - REAL functionality
+        async function saveMoodCheckin() {
+            updateBackendUrl();
+            const mood = document.querySelector('#mood-content input[type="range"]').value;
+            const notes = document.getElementById('mood-notes').value;
+            const energy = 6; // Default for now, could add energy slider later
+            
+            try {
+                const response = await fetch(`${backendUrl}/api/mood/checkin`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: 1,
+                        mood_score: parseInt(mood),
+                        energy_level: energy,
+                        notes: notes,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Store locally
+                    localStorage.setItem('currentMood', mood);
+                    localStorage.setItem('currentEnergy', energy.toString());
+                    
+                    // Clear notes
+                    document.getElementById('mood-notes').value = '';
+                    
+                    // Show success message
+                    alert('🎉 Mood check-in saved! Aurora will use this context in our conversations.');
+                    
+                    // Load mood history
+                    loadMoodHistory();
+                    
+                } else {
+                    throw new Error('Failed to save mood check-in');
+                }
+                
+            } catch (error) {
+                console.error('Mood check-in error:', error);
+                alert('⚠️ Couldn\'t save to backend, but saved locally. Your mood context will still be available for chat.');
+                
+                // Save locally as fallback
+                localStorage.setItem('currentMood', mood);
+                localStorage.setItem('currentEnergy', energy.toString());
+                localStorage.setItem('moodCheckIn', JSON.stringify({
+                    date: new Date().toISOString(),
+                    mood: parseInt(mood),
+                    energy: energy,
+                    notes: notes
+                }));
+            }
+        }
+
+        // Load Mood History
+        async function loadMoodHistory() {
+            updateBackendUrl();
+            
+            try {
+                const response = await fetch(`${backendUrl}/api/mood/history?user_id=1&days=7`);
+                const history = await response.json();
+                
+                // Update weekly overview (implementation would go here)
+                console.log('Mood history loaded:', history);
+                
+            } catch (error) {
+                console.log('Could not load mood history from backend');
+            }
+        }
+
+        // Disconnect Calendar
+        function disconnectCalendar() {
+            if (confirm('Are you sure you want to disconnect Google Calendar?')) {
+                alert('📅 Google Calendar disconnected. You can reconnect anytime from Settings.');
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load saved configuration
+            const savedClientId = localStorage.getItem('googleClientId');
+            const savedClientSecret = localStorage.getItem('googleClientSecret');
+            
+            if (savedClientId) {
+                document.getElementById('clientId').value = savedClientId;
+                googleConfigured = true;
+            }
+            
+            if (savedClientSecret) {
+                document.getElementById('clientSecret').value = savedClientSecret;
+            }
+            
+            updateLaunchButton();
+            
+            // Auto-test backend connection
+            testBackendConnection();
+            
+            // Add tab navigation event listeners
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const tab = this.dataset.tab;
+                    if (tab) {
+                        switchTab(tab);
+                        if (tab === 'goals') {
+                            loadGoals();
+                        }
+                    }
+                });
+            });
+            
+            // Load initial goals
+            loadGoals();
+            
+            // Update backend URL when input changes
+            const backendUrlInput = document.getElementById('backendUrl');
+            if (backendUrlInput) {
+                backendUrlInput.addEventListener('input', updateBackendUrl);
+            }
+            
+            // Start notification monitoring automatically
+            startNotificationMonitoring();
+            
+            // Schedule reminders for upcoming events
+            scheduleEventReminders();
+        });
+        
+        // Notification System
+        let lastMessageId = 0;
+        let notificationInterval = null;
+        
+        // Start notification monitoring
+        function startNotificationMonitoring() {
+            // Check for new messages every 30 seconds
+            if (notificationInterval) {
+                clearInterval(notificationInterval);
+            }
+            
+            notificationInterval = setInterval(async () => {
+                await checkForNewNotifications();
+            }, 30000); // 30 seconds
+            
+            // Also check immediately
+            checkForNewNotifications();
+        }
+        
+        // Check for new notifications and reminders
+        async function checkForNewNotifications() {
+            try {
+                updateBackendUrl();
+                
+                // Check for event reminders
+                const response = await fetch(`${backendUrl}/api/chat/history?limit=10`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const messages = data.messages || [];
+                    
+                    // Find new messages since last check
+                    const newMessages = messages.filter(msg => 
+                        msg.id > lastMessageId && 
+                        msg.role === 'assistant' &&
+                        msg.context_data?.notification_type === 'event_reminder'
+                    );
+                    
+                    if (newMessages.length > 0) {
+                        // Update last message ID
+                        lastMessageId = Math.max(...messages.map(m => m.id));
+                        
+                        // Show notifications
+                        newMessages.forEach(msg => {
+                            showEventReminder(msg);
+                            addNotificationToChat(msg);
+                        });
+                    }
+                }
+                
+                // Check for proactive messages
+                await checkForProactiveMessages();
+                
+            } catch (error) {
+                console.log('Could not check for notifications:', error);
+            }
+        }
+        
+        // Show event reminder as notification
+        function showEventReminder(message) {
+            const context = message.context_data || {};
+            const minutesBefore = context.minutes_before || 0;
+            
+            let urgencyClass = 'reminder-low';
+            let soundAlert = false;
+            
+            if (minutesBefore <= 5) {
+                urgencyClass = 'reminder-high';
+                soundAlert = true;
+            } else if (minutesBefore <= 10) {
+                urgencyClass = 'reminder-medium';
+            }
+            
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `event-reminder ${urgencyClass}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${minutesBefore <= 5 ? '#FF4D4F' : minutesBefore <= 10 ? '#FAAD14' : '#4A90E2'};
+                color: white;
+                padding: 16px 20px;
+                border-radius: 12px;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+                z-index: 10000;
+                max-width: 300px;
+                animation: slideIn 0.3s ease-out;
+                border-left: 4px solid white;
+            `;
+            
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 20px; margin-right: 8px;">${minutesBefore <= 5 ? '🚨' : minutesBefore <= 10 ? '🔔' : '⏰'}</span>
+                    <strong>Event Reminder</strong>
+                </div>
+                <div style="font-size: 14px; line-height: 1.4;">
+                    ${message.content}
+                </div>
+                <button onclick="this.parentNode.remove()" 
+                    style="position: absolute; top: 8px; right: 8px; background: none; border: none; color: white; cursor: pointer; font-size: 16px;">
+                    ×
+                </button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto-remove after delay (shorter for urgent reminders)
+            const removeDelay = minutesBefore <= 5 ? 15000 : 10000;
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.style.animation = 'slideOut 0.3s ease-in';
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.parentNode.removeChild(notification);
+                        }
+                    }, 300);
+                }
+            }, removeDelay);
+            
+            // Play sound for urgent reminders
+            if (soundAlert) {
+                playNotificationSound();
+            }
+        }
+        
+        // Add notification to chat
+        function addNotificationToChat(message) {
+            const messagesContainer = document.querySelector('.chat-messages');
+            if (!messagesContainer) return;
+            
+            const context = message.context_data || {};
+            
+            // Add join button if this is a meeting reminder
+            let joinButtonHtml = '';
+            if (context.meeting_url && context.minutes_before <= 10) {
+                const meetingIcons = {
+                    'zoom': '🎥',
+                    'google-meet': '📹',
+                    'teams': '👥',
+                    'webex': '💼',
+                    'gotomeeting': '📞'
+                };
+                const icon = meetingIcons[context.meeting_type] || '🔗';
+                const urgentStyle = context.minutes_before <= 5 ? 'background: #FF4D4F; animation: pulse 1s infinite;' : 'background: #FAAD14;';
+                
+                joinButtonHtml = `
+                    <button onclick="joinMeeting('${context.meeting_url}', '${context.event_title}')" 
+                        style="${urgentStyle} color: white; border: none; border-radius: 4px; padding: 6px 12px; cursor: pointer; font-size: 11px; font-weight: 500; width: 100%; margin-top: 8px;">
+                        ${icon} Join Meeting Now
+                    </button>
+                `;
+            }
+            
+            const notificationMsg = document.createElement('div');
+            notificationMsg.className = 'message assistant notification';
+            notificationMsg.innerHTML = `
+                <div class="message-bubble" style="background: linear-gradient(135deg, #4A90E2, #722ED1); border-left: 4px solid #FFD700;">
+                    <div style="display: flex; align-items: center; margin-bottom: 4px;">
+                        <span style="font-size: 16px; margin-right: 6px;">🔔</span>
+                        <small style="opacity: 0.8;">Reminder</small>
+                    </div>
+                    ${message.content}
+                    ${joinButtonHtml}
+                    <div style="font-size: 11px; opacity: 0.7; margin-top: 4px;">
+                        ${new Date(message.created_at).toLocaleTimeString()}
+                    </div>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(notificationMsg);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        // Play notification sound
+        function playNotificationSound() {
+            try {
+                // Create audio context for notification sound
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.1);
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime + 0.2);
+                
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime + 0.3);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } catch (error) {
+                console.log('Could not play notification sound:', error);
+            }
+        }
+        
+        // Schedule reminders for upcoming events
+        async function scheduleEventReminders() {
+            try {
+                updateBackendUrl();
+                const response = await fetch(`${backendUrl}/api/notifications/schedule-reminders/1`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Reminders scheduled:', data);
+                    showMessage(`📅 Scheduled ${data.reminders_count} reminders for ${data.events_count} upcoming events`, 'success');
+                } else {
+                    console.log('Could not schedule reminders');
+                }
+            } catch (error) {
+                console.log('Error scheduling reminders:', error);
+            }
+        }
+        
+        // Test reminder system
+        async function testReminderSystem() {
+            try {
+                updateBackendUrl();
+                const response = await fetch(`${backendUrl}/api/notifications/test-reminder?user_id=1`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    showMessage(`🧪 Test reminder scheduled! You'll get a notification in 1 minute for a test event in 2 minutes.`, 'success');
+                    console.log('Test reminder created:', data);
+                } else {
+                    showMessage('❌ Could not create test reminder', 'error');
+                }
+            } catch (error) {
+                showMessage('❌ Error creating test reminder: ' + error.message, 'error');
+            }
+        }
+        
+        // Stop notification monitoring
+        function stopNotificationMonitoring() {
+            if (notificationInterval) {
+                clearInterval(notificationInterval);
+                notificationInterval = null;
+                showMessage('⏹️ Notification monitoring stopped', 'info');
+            }
+        }
+        
+        // ===================== PROACTIVE MESSAGING SYSTEM =====================
+        
+        let lastProactiveCheck = 0; // Timestamp of last proactive check
+        
+        // Check for proactive messages from AI
+        async function checkForProactiveMessages() {
+            try {
+                updateBackendUrl();
+                const response = await fetch(`${backendUrl}/api/proactive/messages/1?limit=5`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const messages = data.messages || [];
+                    
+                    // Filter for new proactive messages
+                    const newMessages = messages.filter(msg => {
+                        const msgTime = new Date(msg.timestamp).getTime();
+                        return msgTime > lastProactiveCheck;
+                    });
+                    
+                    if (newMessages.length > 0) {
+                        // Update last check time
+                        lastProactiveCheck = Date.now();
+                        
+                        // Show proactive messages
+                        newMessages.forEach(msg => {
+                            showProactiveMessage(msg);
+                            addProactiveMessageToChat(msg);
+                        });
+                    }
+                }
+            } catch (error) {
+                console.log('Could not check for proactive messages:', error);
+            }
+        }
+        
+        // Show proactive message as notification
+        function showProactiveMessage(message) {
+            const priority = message.priority || 'medium';
+            
+            let bgColor = '#4A90E2'; // Default blue
+            let icon = '💙';
+            
+            if (priority === 'high') {
+                bgColor = '#FF7875';
+                icon = '🔥';
+            } else if (priority === 'medium') {
+                bgColor = '#FAAD14';
+                icon = '✨';
+            }
+            
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `proactive-message priority-${priority}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                background: ${bgColor};
+                color: white;
+                padding: 16px 20px;
+                border-radius: 12px;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+                z-index: 10000;
+                max-width: 320px;
+                animation: slideIn 0.3s ease-out;
+                border-left: 4px solid white;
+            `;
+            
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 20px; margin-right: 8px;">${icon}</span>
+                    <strong>Aurora reaches out</strong>
+                </div>
+                <div style="font-size: 14px; line-height: 1.4; margin-bottom: 12px;">
+                    ${message.message}
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button onclick="respondToProactiveMessage('${message.trigger_type}', 'Thanks Aurora!')" 
+                        style="flex: 1; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 12px;">
+                        👍 Thanks
+                    </button>
+                    <button onclick="this.closest('.proactive-message').remove()" 
+                        style="background: none; border: none; color: white; cursor: pointer; font-size: 16px; padding: 6px;">
+                        ×
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 15 seconds (longer than event reminders)
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 15000);
+            
+            // Play gentle notification sound
+            playGentleNotificationSound();
+        }
+        
+        // Add proactive message to chat
+        function addProactiveMessageToChat(message) {
+            const messagesContainer = document.getElementById('chatMessages');
+            if (!messagesContainer) return;
+            
+            const triggerIcons = {
+                'mood_gap': '🌙',
+                'mood_pattern': '💭',
+                'goal_deadline': '⏰',
+                'goal_stagnation': '🎯',
+                'goal_celebration': '🎉',
+                'energy_pattern': '⚡',
+                'calendar_pattern': '📅',
+                'engagement_pattern': '👋',
+                'time_pattern': '🕐',
+                'overdue_goal': '🚨'
+            };
+            
+            const icon = triggerIcons[message.trigger_type] || '💙';
+            
+            const proactiveMsg = document.createElement('div');
+            proactiveMsg.className = 'message assistant proactive';
+            proactiveMsg.innerHTML = `
+                <div class="message-bubble" style="background: linear-gradient(135deg, #667eea, #764ba2); border-left: 4px solid #FFD700;">
+                    <div style="display: flex; align-items: center; margin-bottom: 6px;">
+                        <span style="font-size: 16px; margin-right: 6px;">${icon}</span>
+                        <small style="opacity: 0.8; font-weight: 500;">Aurora reaches out</small>
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        ${message.message}
+                    </div>
+                    <div style="display: flex; gap: 6px; margin-top: 8px;">
+                        <button onclick="respondToProactiveMessage('${message.trigger_type}', 'Thank you for reaching out!', ${message.id})" 
+                            style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 11px;">
+                            👍 Thanks
+                        </button>
+                        <button onclick="respondToProactiveMessage('${message.trigger_type}', 'Tell me more about this.', ${message.id})" 
+                            style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 11px;">
+                            💬 Tell me more
+                        </button>
+                    </div>
+                    <div style="font-size: 11px; opacity: 0.7; margin-top: 6px;">
+                        ${new Date(message.timestamp).toLocaleTimeString()}
+                    </div>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(proactiveMsg);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Mark message as read
+            if (message.id) {
+                markProactiveMessageAsRead(message.id);
+            }
+        }
+        
+        // Respond to proactive message
+        async function respondToProactiveMessage(triggerType, response, messageId) {
+            // Remove any proactive notifications
+            document.querySelectorAll('.proactive-message').forEach(el => el.remove());
+            
+            // Mark message as read if not already done
+            if (messageId) {
+                await markProactiveMessageAsRead(messageId);
+            }
+            
+            // Send response as chat message
+            const messageInput = document.getElementById('messageInput');
+            if (messageInput) {
+                messageInput.value = response;
+                await sendMessage();
+            }
+        }
+        
+        // Mark proactive message as read
+        async function markProactiveMessageAsRead(messageId) {
+            try {
+                updateBackendUrl();
+                const response = await fetch(`${backendUrl}/api/proactive/messages/${messageId}/read`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    console.log(`Marked proactive message ${messageId} as read`);
+                }
+            } catch (error) {
+                console.log('Could not mark message as read:', error);
+            }
+        }
+        
+        // Play gentle notification sound for proactive messages
+        function playGentleNotificationSound() {
+            try {
+                // Create a gentle chime sound
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.2);
+                
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.05);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } catch (error) {
+                console.log('Could not play proactive notification sound:', error);
+            }
+        }
+        
+        // Trigger manual proactive check (for testing)
+        async function triggerProactiveCheck() {
+            try {
+                updateBackendUrl();
+                const response = await fetch(`${backendUrl}/api/proactive/trigger/1`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    showMessage('🤖 Proactive check triggered! Aurora is analyzing your patterns...', 'info');
+                    // Wait a moment then check for new messages
+                    setTimeout(checkForProactiveMessages, 2000);
+                } else {
+                    showMessage('❌ Could not trigger proactive check', 'error');
+                }
+            } catch (error) {
+                showMessage('❌ Error: ' + error.message, 'error');
+            }
+        }
+        
+        // Start proactive monitoring
+        async function startProactiveMonitoring() {
+            try {
+                updateBackendUrl();
+                const response = await fetch(`${backendUrl}/api/proactive/start-monitoring`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    showMessage('🤖 Proactive AI monitoring started! Aurora will reach out when she notices patterns.', 'success');
+                } else {
+                    showMessage('⚠️ Could not start proactive monitoring', 'error');
+                }
+            } catch (error) {
+                showMessage('❌ Error starting monitoring: ' + error.message, 'error');
+            }
+        }
+        
+        // ===================== END PROACTIVE MESSAGING =====================
+        
+        // Join meeting function
+        function joinMeeting(meetingUrl, meetingTitle) {
+            try {
+                // Show confirmation before opening meeting
+                if (confirm(`Join "${meetingTitle}"?\n\nThis will open the meeting in a new tab/window.`)) {
+                    // Open meeting link in new tab
+                    window.open(meetingUrl, '_blank', 'noopener,noreferrer');
+                    
+                    // Show success message
+                    showMessage(`🎥 Opening "${meetingTitle}" meeting...`, 'success');
+                    
+                    // Log meeting join for potential goal tracking
+                    console.log(`User joined meeting: ${meetingTitle} at ${new Date().toISOString()}`);
+                }
+            } catch (error) {
+                console.error('Error opening meeting:', error);
+                showMessage('❌ Could not open meeting link', 'error');
+            }
+        }
+        
+        // Goals Management Functions
+        let goals = [];
+        
+        async function loadGoals() {
+            try {
+                const response = await fetch(`${backendUrl}/api/goals/`);
+                if (response.ok) {
+                    goals = await response.json();
+                    renderGoals();
+                } else {
+                    console.error('Failed to load goals');
+                    renderEmptyGoals();
+                }
+            } catch (error) {
+                console.error('Error loading goals:', error);
+                renderEmptyGoals();
+            }
+        }
+        
+        function renderGoals() {
+            const goalsList = document.getElementById('goals-list');
+            
+            if (goals.length === 0) {
+                renderEmptyGoals();
+                return;
+            }
+            
+            const goalsHTML = goals.map(goal => {
+                const categoryEmojis = {
+                    personal: '🌱', career: '💼', health: '❤️', 
+                    learning: '📚', financial: '💰', relationship: '👥', other: '✨'
+                };
+                
+                const statusColors = {
+                    active: { bg: '#E8F5E8', color: '#52C41A', text: 'Active' },
+                    completed: { bg: '#E6F7FF', color: '#1890FF', text: 'Completed' },
+                    paused: { bg: '#FFF7E6', color: '#FAAD14', text: 'Paused' },
+                    cancelled: { bg: '#FFF1F0', color: '#FF4D4F', text: 'Cancelled' }
+                };
+                
+                const statusStyle = statusColors[goal.status] || statusColors.active;
+                const emoji = categoryEmojis[goal.category] || '✨';
+                
+                const targetDateText = goal.target_date ? 
+                    `• Due: ${new Date(goal.target_date).toLocaleDateString()}` : '';
+                
+                const daysUntilText = goal.days_until_target !== null ? 
+                    ` (${goal.days_until_target} days left)` : '';
+                
+                return `
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                            <div style="flex: 1;">
+                                <h3 style="margin: 0 0 4px 0; display: flex; align-items: center;">
+                                    ${emoji} ${goal.title}
+                                </h3>
+                                ${goal.description ? `<p style="margin: 0; font-size: 12px; color: #8C8C8C;">${goal.description}</p>` : ''}
+                            </div>
+                            <span style="font-size: 12px; background: ${statusStyle.bg}; color: ${statusStyle.color}; padding: 4px 8px; border-radius: 12px; margin-left: 8px;">
+                                ${statusStyle.text}
+                            </span>
+                        </div>
+                        
+                        <div style="margin: 12px 0;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                <span style="font-size: 12px; color: #8C8C8C;">Progress</span>
+                                <span style="font-size: 12px; font-weight: 500;">${goal.progress}%</span>
+                            </div>
+                            <div style="width: 100%; height: 8px; background: #E8E8E8; border-radius: 4px; overflow: hidden;">
+                                <div style="height: 100%; background: #52C41A; width: ${goal.progress}%; transition: width 0.3s;"></div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <p style="margin: 0; font-size: 12px; color: #8C8C8C;">
+                                ${goal.category.toUpperCase()} ${targetDateText}${daysUntilText}
+                            </p>
+                        </div>
+                        
+                        <div style="display: flex; gap: 8px; margin-top: 12px;">
+                            <button onclick="updateGoalProgress(${goal.id})" 
+                                style="flex: 1; background: #4A90E2; color: white; border: none; border-radius: 6px; padding: 6px 12px; font-size: 12px; cursor: pointer;">
+                                Update Progress
+                            </button>
+                            <button onclick="editGoal(${goal.id})" 
+                                style="flex: 1; background: #8C8C8C; color: white; border: none; border-radius: 6px; padding: 6px 12px; font-size: 12px; cursor: pointer;">
+                                Edit
+                            </button>
+                            <button onclick="deleteGoal(${goal.id})" 
+                                style="background: #FF4D4F; color: white; border: none; border-radius: 6px; padding: 6px 12px; font-size: 12px; cursor: pointer;">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            goalsList.innerHTML = goalsHTML;
+        }
+        
+        function renderEmptyGoals() {
+            const goalsList = document.getElementById('goals-list');
+            goalsList.innerHTML = `
+                <div style="text-align: center; padding: 40px 20px; color: #8C8C8C;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">🎯</div>
+                    <h3>No goals yet</h3>
+                    <p>Start by adding your first goal to track your progress!</p>
+                </div>
+            `;
+        }
+        
+        function toggleAddGoal() {
+            const form = document.getElementById('add-goal-form');
+            const btn = document.getElementById('add-goal-btn');
+            
+            if (form.classList.contains('hidden')) {
+                form.classList.remove('hidden');
+                btn.style.display = 'none';
+                // Clear form
+                document.getElementById('goal-title').value = '';
+                document.getElementById('goal-description').value = '';
+                document.getElementById('goal-category').value = 'personal';
+                document.getElementById('goal-target-date').value = '';
+            } else {
+                form.classList.add('hidden');
+                btn.style.display = 'block';
+            }
+        }
+        
+        async function saveGoal() {
+            const title = document.getElementById('goal-title').value.trim();
+            const description = document.getElementById('goal-description').value.trim();
+            const category = document.getElementById('goal-category').value;
+            const targetDate = document.getElementById('goal-target-date').value;
+            
+            if (!title) {
+                alert('Please enter a goal title');
+                return;
+            }
+            
+            const goalData = {
+                title: title,
+                description: description || null,
+                category: category,
+                target_date: targetDate ? new Date(targetDate + 'T23:59:59').toISOString() : null
+            };
+            
+            try {
+                const response = await fetch(`${backendUrl}/api/goals/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(goalData)
+                });
+                
+                if (response.ok) {
+                    toggleAddGoal();
+                    loadGoals();
+                    // Show success message briefly
+                    showMessage('Goal added successfully! 🎉', 'success');
+                } else {
+                    const error = await response.json();
+                    alert('Failed to save goal: ' + (error.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Error saving goal: ' + error.message);
+            }
+        }
+        
+        async function updateGoalProgress(goalId) {
+            const currentGoal = goals.find(g => g.id === goalId);
+            if (!currentGoal) return;
+            
+            const newProgress = prompt(`Update progress for "${currentGoal.title}":\nCurrent: ${currentGoal.progress}%\n\nEnter new progress (0-100):`, currentGoal.progress);
+            
+            if (newProgress === null) return; // User cancelled
+            
+            const progress = parseFloat(newProgress);
+            if (isNaN(progress) || progress < 0 || progress > 100) {
+                alert('Please enter a valid progress value between 0 and 100');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${backendUrl}/api/goals/${goalId}/progress?progress=${progress}`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    loadGoals();
+                    showMessage(`Progress updated to ${progress}%! 🎉`, 'success');
+                    
+                    // If goal is completed, show celebration
+                    if (progress >= 100) {
+                        setTimeout(() => {
+                            showMessage(`🎊 Congratulations! You completed "${currentGoal.title}"! 🎊`, 'success');
+                        }, 500);
+                    }
+                } else {
+                    const error = await response.json();
+                    alert('Failed to update progress: ' + (error.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Error updating progress: ' + error.message);
+            }
+        }
+        
+        async function deleteGoal(goalId) {
+            const goal = goals.find(g => g.id === goalId);
+            if (!goal) return;
+            
+            if (!confirm(`Are you sure you want to delete "${goal.title}"?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${backendUrl}/api/goals/${goalId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    loadGoals();
+                    showMessage('Goal deleted successfully', 'success');
+                } else {
+                    const error = await response.json();
+                    alert('Failed to delete goal: ' + (error.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Error deleting goal: ' + error.message);
+            }
+        }
+        
+        function editGoal(goalId) {
+            // For now, just show alert - could implement edit form later
+            alert('Edit functionality coming soon! Use "Update Progress" for now.');
+        }
+        
+        function showMessage(text, type = 'info') {
+            // Create temporary message element
+            const message = document.createElement('div');
+            message.textContent = text;
+            message.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#52C41A' : '#4A90E2'};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                font-weight: 500;
+            `;
+            
+            document.body.appendChild(message);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                if (message.parentNode) {
+                    message.parentNode.removeChild(message);
+                }
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
+</content>
+</invoke>

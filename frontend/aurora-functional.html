@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurora Life OS - Functional Demo</title>
+    <style>
+        /* Mobile-First Design for Aurora Life OS */
+        * {
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f8fafc;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+
+        .mobile-container {
+            max-width: 100vw;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Authentication Styles */
+        .mobile-auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .mobile-auth-card {
+            background: white;
+            border-radius: 20px;
+            padding: 32px 24px;
+            width: 100%;
+            max-width: 360px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .mobile-auth-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px auto;
+        }
+
+        .mobile-auth-logo span {
+            color: white;
+            font-size: 36px;
+            font-weight: bold;
+        }
+
+        .mobile-auth-title {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            color: #1a202c;
+            margin-bottom: 8px;
+        }
+
+        .mobile-auth-subtitle {
+            text-align: center;
+            font-size: 16px;
+            color: #718096;
+            margin-bottom: 32px;
+        }
+
+        .mobile-form-group {
+            margin-bottom: 20px;
+        }
+
+        .mobile-form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .mobile-input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            background: white;
+            transition: all 0.2s ease;
+            margin-bottom: 16px;
+        }
+
+        .mobile-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .mobile-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 16px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            width: 100%;
+            margin-top: 12px;
+        }
+
+        .mobile-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .mobile-button:active {
+            transform: translateY(0px);
+        }
+
+        .mobile-button-small {
+            width: auto;
+            padding: 8px 16px;
+            font-size: 14px;
+            margin: 4px;
+        }
+
+        /* App Interface */
+        .mobile-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-card-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .mobile-card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a202c;
+            margin: 0;
+        }
+
+        .mobile-content {
+            padding: 16px;
+            height: calc(100vh - 140px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .mobile-content::-webkit-scrollbar {
+            display: none;
+        }
+
+        .mobile-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Chat Styles */
+        .chat-container {
+            height: calc(100vh - 200px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .chat-message {
+            margin-bottom: 16px;
+            max-width: 280px;
+            word-wrap: break-word;
+        }
+
+        .chat-message.user {
+            align-self: flex-end;
+            margin-left: auto;
+        }
+
+        .chat-message.ai {
+            align-self: flex-start;
+        }
+
+        .chat-bubble {
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 15px;
+            line-height: 1.4;
+        }
+
+        .chat-bubble.user {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-bubble.ai {
+            background: #f7fafc;
+            color: #2d3748;
+            border-bottom-left-radius: 4px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .chat-input-container {
+            padding: 16px;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 16px;
+            resize: none;
+            max-height: 100px;
+        }
+
+        .chat-send-button {
+            width: 44px;
+            height: 44px;
+            border-radius: 22px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Bottom Navigation */
+        .mobile-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 8px 0;
+            z-index: 200;
+            box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-bottom-nav-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 0 12px;
+        }
+
+        .mobile-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 12px;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            min-width: 60px;
+            text-decoration: none;
+            color: #718096;
+        }
+
+        .mobile-nav-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .mobile-nav-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .mobile-nav-label {
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Goal and Mood specific styles */
+        .goal-item, .mood-item {
+            background: #f7fafc;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .progress-bar {
+            background: #e2e8f0;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+
+        /* Calendar styles */
+        .calendar-event {
+            background: white;
+            border-left: 4px solid #667eea;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .event-time {
+            font-size: 12px;
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .event-title {
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 4px;
+        }
+
+        .event-description {
+            font-size: 14px;
+            color: #718096;
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-container">
+        <!-- Authentication Screen -->
+        <div id="auth-screen" class="mobile-auth-container">
+            <div class="mobile-auth-card">
+                <div class="mobile-auth-logo">
+                    <span>A</span>
+                </div>
+                <h1 class="mobile-auth-title">Welcome to Aurora</h1>
+                <p class="mobile-auth-subtitle">Your AI Life Companion</p>
+                
+                <div id="login-form">
+                    <form onsubmit="handleAuth(event)">
+                        <div class="mobile-form-group">
+                            <label class="mobile-form-label">Username or Email</label>
+                            <input type="text" class="mobile-input" placeholder="demo@aurora.ai" value="demo@aurora.ai" required>
+                        </div>
+                        <div class="mobile-form-group">
+                            <label class="mobile-form-label">Password</label>
+                            <input type="password" class="mobile-input" placeholder="password" value="demo123" required>
+                        </div>
+                        <button type="submit" class="mobile-button">Sign In to Demo</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main App Interface -->
+        <div id="main-app" class="hidden">
+            <!-- Header -->
+            <div class="mobile-header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div class="mobile-card-icon">
+                        <span style="font-size: 18px;">A</span>
+                    </div>
+                    <div>
+                        <h1 class="mobile-card-title" id="header-title">Aurora</h1>
+                        <p style="font-size: 12px; color: #718096; margin: 2px 0 0 0;" id="header-subtitle">Your AI life companion</p>
+                    </div>
+                </div>
+                <button onclick="logout()" style="background: none; border: none; color: #718096; cursor: pointer; font-size: 14px;">Logout</button>
+            </div>
+
+            <!-- Content Area -->
+            <div class="mobile-content">
+                <!-- Chat Tab -->
+                <div id="chat-content" class="tab-content">
+                    <div class="chat-container">
+                        <div class="chat-messages" id="chat-messages">
+                            <div class="chat-message ai">
+                                <div class="chat-bubble ai">
+                                    <p>Good morning! I'm Aurora, your AI life companion. How are you feeling today? 😊</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-input-container">
+                            <input type="text" class="chat-input" id="chat-input" placeholder="Message Aurora..." onkeypress="handleChatKeyPress(event)">
+                            <button class="chat-send-button" onclick="sendMessage()">➤</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calendar Tab -->
+                <div id="calendar-content" class="tab-content hidden">
+                    <div class="mobile-card">
+                        <h2 style="margin: 0 0 16px 0; color: #1a202c;">📅 Today's Schedule</h2>
+                        <div id="calendar-events">
+                            <div class="calendar-event">
+                                <div class="event-time">9:00 AM</div>
+                                <div class="event-title">Morning Planning</div>
+                                <div class="event-description">AI-optimized schedule review</div>
+                            </div>
+                            <div class="calendar-event">
+                                <div class="event-time">11:30 AM</div>
+                                <div class="event-title">Goal Work: Learn React</div>
+                                <div class="event-description">Focus session for skill development</div>
+                            </div>
+                            <div class="calendar-event">
+                                <div class="event-time">2:00 PM</div>
+                                <div class="event-title">Project Review</div>
+                                <div class="event-description">Aurora Life OS development</div>
+                            </div>
+                        </div>
+                        <button class="mobile-button" onclick="addCalendarEvent()">Add Event</button>
+                    </div>
+                </div>
+
+                <!-- Goals Tab -->
+                <div id="goals-content" class="tab-content hidden">
+                    <div class="mobile-card">
+                        <h2 style="margin: 0 0 16px 0; color: #1a202c;">🎯 My Goals</h2>
+                        <div id="goals-list">
+                            <div class="goal-item">
+                                <h4 style="margin: 0 0 8px 0; color: #1a202c;">Learn React Development</h4>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 75%;"></div>
+                                </div>
+                                <p style="margin: 8px 0 0 0; font-size: 14px; color: #718096;">75% complete • Due: Dec 31, 2024</p>
+                            </div>
+                            <div class="goal-item">
+                                <h4 style="margin: 0 0 8px 0; color: #1a202c;">Build Aurora Life OS</h4>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 90%;"></div>
+                                </div>
+                                <p style="margin: 8px 0 0 0; font-size: 14px; color: #718096;">90% complete • Due: Aug 31, 2025</p>
+                            </div>
+                            <div class="goal-item">
+                                <h4 style="margin: 0 0 8px 0; color: #1a202c;">Daily Exercise Routine</h4>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 45%;"></div>
+                                </div>
+                                <p style="margin: 8px 0 0 0; font-size: 14px; color: #718096;">45% complete • Ongoing</p>
+                            </div>
+                        </div>
+                        <button class="mobile-button" onclick="addGoal()">Add New Goal</button>
+                    </div>
+                </div>
+
+                <!-- Mood Tab -->
+                <div id="mood-content" class="tab-content hidden">
+                    <div class="mobile-card">
+                        <h2 style="margin: 0 0 16px 0; color: #1a202c;">❤️ Mood Tracker</h2>
+                        <div style="text-align: center; margin-bottom: 24px;">
+                            <p style="margin-bottom: 16px; color: #718096;">How are you feeling right now?</p>
+                            <div style="display: flex; justify-content: space-around; margin-bottom: 20px;">
+                                <button class="mood-btn" onclick="setMood(1)" title="😢 Very Sad">😢</button>
+                                <button class="mood-btn" onclick="setMood(2)" title="😕 Sad">😕</button>
+                                <button class="mood-btn" onclick="setMood(3)" title="😐 Neutral">😐</button>
+                                <button class="mood-btn" onclick="setMood(4)" title="😊 Happy">😊</button>
+                                <button class="mood-btn" onclick="setMood(5)" title="😄 Very Happy">😄</button>
+                            </div>
+                        </div>
+                        
+                        <h3 style="margin: 24px 0 12px 0; color: #1a202c;">Recent Mood History</h3>
+                        <div id="mood-history">
+                            <div class="mood-item">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span>Today</span>
+                                    <span style="font-size: 20px;">😊</span>
+                                </div>
+                                <p style="margin: 4px 0 0 0; font-size: 14px; color: #718096;">Feeling productive and motivated</p>
+                            </div>
+                            <div class="mood-item">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span>Yesterday</span>
+                                    <span style="font-size: 20px;">😄</span>
+                                </div>
+                                <p style="margin: 4px 0 0 0; font-size: 14px; color: #718096;">Great progress on goals!</p>
+                            </div>
+                            <div class="mood-item">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span>2 days ago</span>
+                                    <span style="font-size: 20px;">😐</span>
+                                </div>
+                                <p style="margin: 4px 0 0 0; font-size: 14px; color: #718096;">Average day, some challenges</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Tab -->
+                <div id="profile-content" class="tab-content hidden">
+                    <div class="mobile-card">
+                        <h2 style="margin: 0 0 16px 0; color: #1a202c;">👤 Profile</h2>
+                        <div style="text-align: center; margin-bottom: 24px;">
+                            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 40px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                                <span style="color: white; font-size: 32px; font-weight: bold;">D</span>
+                            </div>
+                            <h3 style="margin: 0 0 4px 0; color: #1a202c;">Demo User</h3>
+                            <p style="margin: 0; color: #718096; font-size: 14px;">demo@aurora.ai</p>
+                        </div>
+
+                        <div style="background: #f7fafc; padding: 16px; border-radius: 12px; margin-bottom: 16px;">
+                            <h4 style="margin: 0 0 12px 0; color: #1a202c;">📊 Quick Stats</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div style="text-align: center;">
+                                    <div style="font-size: 24px; font-weight: bold; color: #667eea;">3</div>
+                                    <div style="font-size: 12px; color: #718096;">Active Goals</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 24px; font-weight: bold; color: #667eea;">7</div>
+                                    <div style="font-size: 12px; color: #718096;">Days Streak</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 24px; font-weight: bold; color: #667eea;">😊</div>
+                                    <div style="font-size: 12px; color: #718096;">Avg Mood</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 24px; font-weight: bold; color: #667eea;">12</div>
+                                    <div style="font-size: 12px; color: #718096;">Events Today</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 80px;">
+                            <button class="mobile-button mobile-button-small" onclick="editProfile()">Edit Profile</button>
+                            <button class="mobile-button mobile-button-small" onclick="showSettings()">Settings</button>
+                            <button class="mobile-button mobile-button-small" style="background: #e53e3e;" onclick="logout()">Sign Out</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Navigation -->
+            <nav class="mobile-bottom-nav">
+                <div class="mobile-bottom-nav-container">
+                    <div class="mobile-nav-item active" onclick="switchTab('chat')">
+                        <div class="mobile-nav-icon">💬</div>
+                        <span class="mobile-nav-label">Chat</span>
+                    </div>
+                    <div class="mobile-nav-item" onclick="switchTab('calendar')">
+                        <div class="mobile-nav-icon">📅</div>
+                        <span class="mobile-nav-label">Calendar</span>
+                    </div>
+                    <div class="mobile-nav-item" onclick="switchTab('goals')">
+                        <div class="mobile-nav-icon">🎯</div>
+                        <span class="mobile-nav-label">Goals</span>
+                    </div>
+                    <div class="mobile-nav-item" onclick="switchTab('mood')">
+                        <div class="mobile-nav-icon">❤️</div>
+                        <span class="mobile-nav-label">Mood</span>
+                    </div>
+                    <div class="mobile-nav-item" onclick="switchTab('profile')">
+                        <div class="mobile-nav-icon">👤</div>
+                        <span class="mobile-nav-label">Profile</span>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let currentUser = null;
+        let currentTab = 'chat';
+
+        // Authentication
+        function handleAuth(event) {
+            event.preventDefault();
+            const email = event.target.querySelector('input[type="text"]').value;
+            const password = event.target.querySelector('input[type="password"]').value;
+            
+            // Simulate authentication
+            currentUser = { email, name: 'Demo User' };
+            showApp();
+        }
+
+        function showApp() {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            switchTab('chat');
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('main-app').classList.add('hidden');
+            document.getElementById('auth-screen').classList.remove('hidden');
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            currentTab = tabName;
+            
+            // Hide all content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.mobile-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show selected content
+            document.getElementById(tabName + '-content').classList.remove('hidden');
+            
+            // Add active class to clicked tab
+            event.target.closest('.mobile-nav-item').classList.add('active');
+            
+            // Update header
+            updateHeader(tabName);
+        }
+
+        function updateHeader(tabName) {
+            const titles = {
+                'chat': 'Aurora',
+                'calendar': 'Calendar',
+                'goals': 'Goals',
+                'mood': 'Mood',
+                'profile': 'Profile'
+            };
+            
+            const subtitles = {
+                'chat': 'Your AI life companion',
+                'calendar': 'Schedule & Events',
+                'goals': 'Track your progress',
+                'mood': 'How are you feeling?',
+                'profile': 'Your account settings'
+            };
+            
+            document.getElementById('header-title').textContent = titles[tabName];
+            document.getElementById('header-subtitle').textContent = subtitles[tabName];
+        }
+
+        // Chat functionality
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            // Add user message
+            addChatMessage(message, 'user');
+            input.value = '';
+            
+            // Simulate AI response
+            setTimeout(() => {
+                const responses = [
+                    "That's great! I'm here to help you stay organized and motivated. 🌟",
+                    "I understand. Let's work together to make your day better! What would you like to focus on?",
+                    "Excellent! Your goals are looking good. Would you like me to help you schedule some focused work time?",
+                    "I can see you're making progress! Let's check your calendar and see what's coming up.",
+                    "That's wonderful to hear! Remember, I'm always here when you need guidance or motivation. 💪"
+                ];
+                const response = responses[Math.floor(Math.random() * responses.length)];
+                addChatMessage(response, 'ai');
+            }, 1000);
+        }
+
+        function addChatMessage(message, sender) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${sender}`;
+            messageDiv.innerHTML = `<div class="chat-bubble ${sender}"><p>${message}</p></div>`;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Calendar functionality
+        function addCalendarEvent() {
+            const title = prompt('Event title:');
+            const time = prompt('Time (e.g., 3:00 PM):');
+            if (title && time) {
+                const eventsContainer = document.getElementById('calendar-events');
+                const eventDiv = document.createElement('div');
+                eventDiv.className = 'calendar-event';
+                eventDiv.innerHTML = `
+                    <div class="event-time">${time}</div>
+                    <div class="event-title">${title}</div>
+                    <div class="event-description">User added event</div>
+                `;
+                eventsContainer.appendChild(eventDiv);
+            }
+        }
+
+        // Goals functionality
+        function addGoal() {
+            const title = prompt('Goal title:');
+            const deadline = prompt('Deadline (e.g., Dec 31, 2024):');
+            if (title && deadline) {
+                const goalsContainer = document.getElementById('goals-list');
+                const goalDiv = document.createElement('div');
+                goalDiv.className = 'goal-item';
+                goalDiv.innerHTML = `
+                    <h4 style="margin: 0 0 8px 0; color: #1a202c;">${title}</h4>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%;"></div>
+                    </div>
+                    <p style="margin: 8px 0 0 0; font-size: 14px; color: #718096;">0% complete • Due: ${deadline}</p>
+                `;
+                goalsContainer.appendChild(goalDiv);
+            }
+        }
+
+        // Mood functionality
+        function setMood(moodValue) {
+            const moods = ['', '😢', '😕', '😐', '😊', '😄'];
+            const moodNames = ['', 'Very Sad', 'Sad', 'Neutral', 'Happy', 'Very Happy'];
+            
+            // Add to history
+            const historyContainer = document.getElementById('mood-history');
+            const moodDiv = document.createElement('div');
+            moodDiv.className = 'mood-item';
+            moodDiv.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>Just now</span>
+                    <span style="font-size: 20px;">${moods[moodValue]}</span>
+                </div>
+                <p style="margin: 4px 0 0 0; font-size: 14px; color: #718096;">Feeling ${moodNames[moodValue].toLowerCase()}</p>
+            `;
+            historyContainer.insertBefore(moodDiv, historyContainer.firstChild);
+            
+            // Show feedback
+            alert(`Mood logged: ${moodNames[moodValue]} ${moods[moodValue]}`);
+        }
+
+        // Profile functionality
+        function editProfile() {
+            alert('Profile editing coming soon! 👤');
+        }
+
+        function showSettings() {
+            alert('Settings panel coming soon! ⚙️');
+        }
+
+        // Mood button styling
+        document.addEventListener('DOMContentLoaded', function() {
+            const style = document.createElement('style');
+            style.textContent = `
+                .mood-btn {
+                    background: none;
+                    border: 2px solid #e2e8f0;
+                    border-radius: 50%;
+                    width: 50px;
+                    height: 50px;
+                    font-size: 24px;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                }
+                .mood-btn:hover {
+                    border-color: #667eea;
+                    transform: scale(1.1);
+                }
+            `;
+            document.head.appendChild(style);
+            
+            console.log('Aurora Life OS Functional Demo - Ready! 🚀');
+        });
+    </script>
+</body>
+</html>

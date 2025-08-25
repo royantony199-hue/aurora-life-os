@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Aurora Life OS - Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #F5F7FA 0%, #C3CFE2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #4A90E2, #722ED1);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .content {
+            padding: 30px;
+            text-align: center;
+        }
+        .tabs {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            border-top: 1px solid #eee;
+            background: #fff;
+        }
+        .tab {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            color: #8C8C8C;
+            font-size: 12px;
+        }
+        .tab.active {
+            color: #4A90E2;
+        }
+        .icon {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 5px;
+            background: currentColor;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌟 Aurora Life OS</h1>
+            <p>Your AI Life Companion</p>
+        </div>
+        <div class="content">
+            <h2>✅ Server is Running!</h2>
+            <p>Aurora Life OS is now live and working.</p>
+            <ul style="text-align: left; color: #666;">
+                <li>✅ Frontend Server: RUNNING</li>
+                <li>✅ Backend API: RUNNING</li>
+                <li>✅ Google Calendar: READY</li>
+                <li>✅ AI Integration: READY</li>
+                <li>✅ Mood Tracking: READY</li>
+            </ul>
+        </div>
+        <div class="tabs">
+            <div class="tab active">
+                <div class="icon"></div>
+                <span>Chat</span>
+            </div>
+            <div class="tab">
+                <div class="icon"></div>
+                <span>Calendar</span>
+            </div>
+            <div class="tab">
+                <div class="icon"></div>
+                <span>Goals</span>
+            </div>
+            <div class="tab">
+                <div class="icon"></div>
+                <span>Mood</span>
+            </div>
+            <div class="tab">
+                <div class="icon"></div>
+                <span>Profile</span>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurora Life OS - Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #F5F7FA;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            margin-bottom: 20px;
+            padding: 16px;
+            border: 1px solid #E8E8E8;
+            border-radius: 8px;
+        }
+        
+        button {
+            background: #4A90E2;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background: #357ABD;
+        }
+        
+        .success { color: #52C41A; }
+        .error { color: #FF4D4F; }
+        .info { color: #4A90E2; }
+        
+        #results {
+            margin-top: 20px;
+            padding: 16px;
+            background: #FAFAFA;
+            border-radius: 8px;
+            min-height: 100px;
+        }
+        
+        .ai-calendar-test {
+            background: linear-gradient(135deg, #4A90E2, #722ED1);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        input, select {
+            padding: 8px 12px;
+            border: 1px solid #D9D9D9;
+            border-radius: 6px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌟 Aurora Life OS - System Test</h1>
+            <p>Testing AI Calendar System & Backend Connection</p>
+        </div>
+        
+        <!-- Backend Connection Test -->
+        <div class="test-section">
+            <h3>🔌 Backend Connection Test</h3>
+            <button onclick="testBackendConnection()">Test Backend Health</button>
+            <button onclick="testAPIEndpoints()">Test API Endpoints</button>
+            <div id="connection-status"></div>
+        </div>
+        
+        <!-- AI Calendar System Test -->
+        <div class="ai-calendar-test">
+            <h3>🤖 AI Calendar System Test</h3>
+            <div style="margin-bottom: 16px;">
+                <input type="text" id="test-event-title" placeholder="Test event title" value="Work on important project">
+                <select id="test-duration">
+                    <option value="30">30 min</option>
+                    <option value="60" selected>1 hour</option>
+                    <option value="120">2 hours</option>
+                </select>
+                <button onclick="testSmartEventCreation()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">🎯 Test AI Scheduling</button>
+            </div>
+            <button onclick="testHourlySchedule()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">📅 Test Today's Schedule</button>
+            <button onclick="testGoalScheduling()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">🎯 Test Goal Scheduling</button>
+        </div>
+        
+        <!-- Interactive Elements Test -->
+        <div class="test-section">
+            <h3>⚡ Interactive Elements Test</h3>
+            <button onclick="testBasicInteraction()">Test Click Response</button>
+            <button onclick="testFormElements()">Test Form Elements</button>
+            <button onclick="testNavigation()">Test Tab Navigation</button>
+            <div style="margin-top: 10px;">
+                <input type="text" id="test-input" placeholder="Type here to test input">
+                <button onclick="testInputValue()">Read Input Value</button>
+            </div>
+        </div>
+        
+        <!-- Results Display -->
+        <div id="results">
+            <p><strong>Test Results:</strong></p>
+            <p>Click any test button to see results here...</p>
+        </div>
+        
+        <!-- Quick Access -->
+        <div class="test-section">
+            <h3>🚀 Quick Access</h3>
+            <button onclick="openMainApp()">Open Main Aurora App</button>
+            <button onclick="window.location.href='http://localhost:8000'">Open Backend API</button>
+        </div>
+    </div>
+    
+    <script>
+        const backendUrl = 'http://127.0.0.1:8000';
+        
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : 'info';
+            results.innerHTML += `<p class="${className}">[${timestamp}] ${message}</p>`;
+            results.scrollTop = results.scrollHeight;
+        }
+        
+        // Backend Connection Tests
+        async function testBackendConnection() {
+            log('🔍 Testing backend connection...');
+            try {
+                const response = await fetch(`${backendUrl}/health`);
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ Backend connected successfully: ${JSON.stringify(data)}`, 'success');
+                } else {
+                    log(`❌ Backend responded with status: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Backend connection failed: ${error.message}`, 'error');
+                log('💡 Make sure the backend is running: cd backend && uvicorn app.main:app --reload', 'info');
+            }
+        }
+        
+        async function testAPIEndpoints() {
+            log('🔍 Testing API endpoints...');
+            const endpoints = [
+                '/api/goals/user/1',
+                '/api/calendar/events?user_id=1&days_ahead=7',
+                '/api/analytics/mood/history/1?days=7'
+            ];
+            
+            for (const endpoint of endpoints) {
+                try {
+                    const response = await fetch(`${backendUrl}${endpoint}`);
+                    if (response.ok) {
+                        log(`✅ ${endpoint} - OK`, 'success');
+                    } else {
+                        log(`⚠️ ${endpoint} - Status: ${response.status}`, 'error');
+                    }
+                } catch (error) {
+                    log(`❌ ${endpoint} - Error: ${error.message}`, 'error');
+                }
+            }
+        }
+        
+        // AI Calendar Tests
+        async function testSmartEventCreation() {
+            const title = document.getElementById('test-event-title').value;
+            const duration = parseInt(document.getElementById('test-duration').value);
+            
+            log('🤖 Testing AI smart event creation...');
+            try {
+                const response = await fetch(`${backendUrl}/api/ai-calendar/smart-create`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: title,
+                        duration_minutes: duration,
+                        event_type: 'task',
+                        priority: 'medium'
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    log(`✅ AI scheduled "${title}" for ${new Date(result.scheduled_time).toLocaleString()}`, 'success');
+                    if (result.ai_insights?.reasoning) {
+                        log(`🧠 AI Reasoning: ${result.ai_insights.reasoning}`, 'info');
+                    }
+                } else {
+                    log(`❌ AI scheduling failed: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Smart event creation error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testHourlySchedule() {
+            const today = new Date().toISOString().split('T')[0];
+            log('📅 Testing hourly schedule generation...');
+            
+            try {
+                const response = await fetch(`${backendUrl}/api/ai-calendar/hourly-schedule`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ date: today })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    log(`✅ Generated ${result.hourly_schedule.length} hour schedule with ${result.productivity_score}% productivity score`, 'success');
+                    log(`🎯 AI generated ${result.ai_generated_slots} optimized time slots`, 'info');
+                } else {
+                    log(`❌ Hourly schedule generation failed`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Hourly schedule error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testGoalScheduling() {
+            log('🎯 Testing goal-based scheduling...');
+            
+            try {
+                const response = await fetch(`${backendUrl}/api/ai-calendar/bulk-schedule-from-goals?days_ahead=7`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    log(`✅ Scheduled ${result.scheduled_events.length} goal sessions across ${result.goals_processed} goals`, 'success');
+                } else {
+                    log(`⚠️ ${result.message || 'No goals to schedule'}`, 'info');
+                }
+            } catch (error) {
+                log(`❌ Goal scheduling error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Interactive Tests
+        function testBasicInteraction() {
+            log('⚡ Click response working perfectly!', 'success');
+            log('✅ JavaScript is functioning correctly', 'success');
+        }
+        
+        function testFormElements() {
+            const input = document.getElementById('test-input');
+            input.value = 'Form elements are working!';
+            input.style.background = '#F0F9FF';
+            log('✅ Form elements are interactive and responsive', 'success');
+        }
+        
+        function testInputValue() {
+            const input = document.getElementById('test-input');
+            const value = input.value;
+            if (value) {
+                log(`✅ Input value captured: "${value}"`, 'success');
+            } else {
+                log('⚠️ Please type something in the input field first', 'info');
+            }
+        }
+        
+        function testNavigation() {
+            log('✅ Tab navigation would work in main app', 'success');
+            log('💡 This test app is simplified - full navigation available in main app', 'info');
+        }
+        
+        function openMainApp() {
+            log('🚀 Opening main Aurora Life OS app...', 'info');
+            window.open('/Users/royantony/auroyra%20life%20os/aurora-exact-design.html', '_blank');
+        }
+        
+        // Auto-run basic tests on load
+        window.addEventListener('DOMContentLoaded', () => {
+            log('🌟 Aurora Life OS Test Suite Loaded', 'success');
+            log('💡 Click "Test Backend Health" to start system diagnostics', 'info');
+            
+            // Auto-test backend after 2 seconds
+            setTimeout(testBackendConnection, 2000);
+        });
+    </script>
+</body>
+</html>

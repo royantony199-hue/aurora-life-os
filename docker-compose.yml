@@ -1,0 +1,134 @@
+# Development Docker Compose for Aurora Life OS
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: aurora_postgres_dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: aurora_db
+      POSTGRES_USER: aurora_user
+      POSTGRES_PASSWORD: aurora_pass
+      POSTGRES_INITDB_ARGS: "--auth-local=trust --auth-host=md5"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aurora_user -d aurora_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - aurora_network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: aurora_redis_dev
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ""
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - aurora_network
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: aurora_backend_dev
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # Application
+      APP_NAME: "Aurora Life OS"
+      VERSION: "1.0.0"
+      ENVIRONMENT: "development"
+      DEBUG: "true"
+      
+      # Database
+      DATABASE_URL: "postgresql://aurora_user:aurora_pass@postgres:5432/aurora_db"
+      DATABASE_POOL_SIZE: 10
+      DATABASE_MAX_OVERFLOW: 20
+      
+      # Security (use your generated keys from .env)
+      SECRET_KEY: "${SECRET_KEY:-your-secret-key-here}"
+      REFRESH_SECRET_KEY: "${REFRESH_SECRET_KEY:-your-refresh-secret-key-here}"
+      ENCRYPTION_KEY: "${ENCRYPTION_KEY:-your-encryption-key-32-characters}"
+      
+      # Redis
+      REDIS_URL: "redis://redis:6379/0"
+      
+      # CORS
+      ALLOWED_ORIGINS: "http://localhost:5173,http://localhost:3000"
+      
+      # External APIs
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+      GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID:-}"
+      GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET:-}"
+      
+      # Logging
+      LOG_LEVEL: "DEBUG"
+    volumes:
+      - ./backend:/app
+      - backend_uploads:/app/uploads
+      - backend_logs:/app/logs
+    ports:
+      - "8001:8001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    networks:
+      - aurora_network
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: aurora_frontend_dev
+    restart: unless-stopped
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8001
+    networks:
+      - aurora_network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  backend_uploads:
+    driver: local
+  backend_logs:
+    driver: local
+
+networks:
+  aurora_network:
+    driver: bridge

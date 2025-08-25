@@ -1,0 +1,3303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurora Life OS - Exact Design</title>
+    <!-- Chart.js for mood visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #F5F7FA;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Main App Container */
+        .app-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            max-width: 430px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        /* Chat Interface Styles */
+        .chat-header {
+            background: white;
+            border-bottom: 1px solid #D9D9D9;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .chat-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #4A90E2, #722ED1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 500;
+            margin-right: 12px;
+        }
+        
+        .chat-info h1 {
+            font-size: 16px;
+            color: #262626;
+            margin-bottom: 2px;
+        }
+        
+        .chat-info p {
+            font-size: 14px;
+            color: #8C8C8C;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-height: calc(100vh - 200px);
+            min-height: 300px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: #D9D9D9 transparent;
+        }
+        
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #D9D9D9;
+            border-radius: 3px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #BFBFBF;
+        }
+        
+        .message {
+            display: flex;
+        }
+        
+        .message.user {
+            justify-content: flex-end;
+        }
+        
+        .message-bubble {
+            max-width: 280px;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .message.ai .message-bubble {
+            background: #F5F7FA;
+            color: #262626;
+        }
+        
+        .message.user .message-bubble {
+            background: #4A90E2;
+            color: white;
+        }
+        
+        .quick-replies {
+            margin-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .quick-reply {
+            padding: 8px 12px;
+            background: white;
+            color: #4A90E2;
+            border: 1px solid #4A90E2;
+            border-radius: 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .quick-reply:hover {
+            background: #4A90E2;
+            color: white;
+        }
+        
+        .chat-input-area {
+            border-top: 1px solid #D9D9D9;
+            padding: 12px 16px;
+            background: white;
+        }
+        
+        .input-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .input-field {
+            flex: 1;
+            background: #F5F7FA;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 16px;
+            font-size: 14px;
+            outline: none;
+        }
+        
+        .send-button {
+            width: 36px;
+            height: 36px;
+            background: #4A90E2;
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Mood Tracker Styles */
+        .mood-header {
+            padding: 20px 16px;
+            text-align: center;
+            background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+            color: white;
+        }
+        
+        .mood-header h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        
+        .mood-content {
+            flex: 1;
+            padding: 20px 16px;
+            overflow-y: auto;
+        }
+        
+        .mood-checkin {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        
+        .mood-scale {
+            margin: 16px 0;
+        }
+        
+        .mood-emojis {
+            display: flex;
+            justify-content: space-between;
+            margin: 12px 0;
+        }
+        
+        .mood-emoji {
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+        
+        .mood-emoji.selected {
+            background: #4A90E2;
+            transform: scale(1.2);
+        }
+        
+        .energy-emoji {
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+        
+        .energy-emoji.selected {
+            background: #52C41A;
+            transform: scale(1.2);
+        }
+        
+        .mood-slider {
+            width: 100%;
+            height: 6px;
+            background: #E8E8E8;
+            border-radius: 3px;
+            appearance: none;
+            outline: none;
+        }
+        
+        .mood-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #4A90E2;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        /* Calendar Styles */
+        .calendar-header {
+            background: linear-gradient(135deg, #4A90E2, #722ED1);
+            color: white;
+            padding: 20px 16px;
+            text-align: center;
+        }
+        
+        .calendar-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nav-button {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            padding: 16px;
+        }
+        
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .calendar-day.today {
+            background: #4A90E2;
+            color: white;
+        }
+        
+        .calendar-day:hover {
+            background: #F5F7FA;
+        }
+        
+        /* Goals Dashboard Styles */
+        .goals-header {
+            background: linear-gradient(135deg, #52C41A, #73D13D);
+            color: white;
+            padding: 20px 16px;
+            text-align: center;
+        }
+        
+        .goal-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 12px 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .goal-progress {
+            width: 100%;
+            height: 8px;
+            background: #E8E8E8;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+        
+        .goal-progress-fill {
+            height: 100%;
+            background: #52C41A;
+            transition: width 0.3s;
+        }
+        
+        /* Profile Settings Styles */
+        .profile-header {
+            background: linear-gradient(135deg, #722ED1, #9254DE);
+            color: white;
+            padding: 20px 16px;
+            text-align: center;
+        }
+        
+        .profile-section {
+            background: white;
+            margin: 12px 16px;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .connect-button {
+            width: 100%;
+            background: #4285F4;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            background: white;
+            border-top: 1px solid #D9D9D9;
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 60px;
+            color: #8C8C8C;
+        }
+        
+        .nav-item:hover {
+            background: #F5F7FA;
+        }
+        
+        .nav-item.active {
+            color: #4A90E2;
+            background: rgba(74, 144, 226, 0.1);
+        }
+        
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 4px;
+            background: currentColor;
+            border-radius: 4px;
+            opacity: 0.8;
+        }
+        
+        .nav-label {
+            font-size: 10px;
+            font-weight: 500;
+        }
+        
+        .content {
+            flex: 1;
+            overflow: hidden;
+            background: #F5F7FA;
+        }
+        
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            padding: 8px 0;
+        }
+        
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: #8C8C8C;
+            border-radius: 50%;
+            animation: typing 1.5s infinite;
+        }
+        
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+        
+        .hidden { display: none; }
+        
+        /* Responsive adjustments */
+        /* Notification Animations */
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+        
+        @media (max-width: 430px) {
+            .app-container {
+                height: 100vh;
+                max-width: 100vw;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Connection Status Indicator -->
+    <div id="connection-status" style="position: fixed; top: 10px; right: 10px; padding: 8px 16px; border-radius: 20px; font-size: 12px; background: #52c41a; color: white; display: flex; align-items: center; gap: 8px; z-index: 10000;">
+        <span id="status-dot" style="width: 8px; height: 8px; background: white; border-radius: 50%; display: inline-block;"></span>
+        <span id="status-text">Connected</span>
+    </div>
+    
+    <div class="app-container">
+        <!-- Chat Interface -->
+        <div id="chat-content" class="content">
+            <div class="chat-header">
+                <div class="chat-avatar">A</div>
+                <div class="chat-info">
+                    <h1>Aurora</h1>
+                    <p>Your AI life companion</p>
+                </div>
+                <button style="margin-left: auto; background: none; border: none; color: #8C8C8C; padding: 8px;">⋯</button>
+            </div>
+            
+            <div class="chat-messages">
+                <div class="message ai">
+                    <div class="message-bubble">
+                        Good morning! I'm Aurora, your AI life companion. How are you feeling today?
+                        <div class="quick-replies">
+                            <button class="quick-reply" onclick="sendMessage('Great!')">Great!</button>
+                            <button class="quick-reply" onclick="sendMessage('Could be better')">Could be better</button>
+                            <button class="quick-reply" onclick="sendMessage('Feeling motivated')">Feeling motivated</button>
+                            <button class="quick-reply" onclick="sendMessage('Need some guidance')">Need some guidance</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Smart To-Do Suggestions -->
+            <div id="smart-suggestions-panel" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: 8px 16px; border-radius: 12px; padding: 16px; color: white; display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <h4 style="margin: 0; font-size: 14px;">🎯 Next Task Suggestion</h4>
+                    <button onclick="refreshTaskSuggestion()" style="background: rgba(255,255,255,0.2); border: none; color: white; border-radius: 4px; padding: 4px 8px; font-size: 11px; cursor: pointer;">↻</button>
+                </div>
+                <div id="suggestion-content">
+                    <div style="display: flex; justify-content: center; padding: 20px;">
+                        <div style="width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid white; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                    </div>
+                </div>
+                <div style="display: none; gap: 8px; margin-top: 12px;" id="suggestion-actions">
+                    <button onclick="startSuggestedTask()" style="background: #52C41A; color: white; border: none; border-radius: 6px; padding: 8px 12px; font-size: 12px; cursor: pointer; flex: 1;">Start Task</button>
+                    <button onclick="skipSuggestion()" style="background: rgba(255,255,255,0.2); color: white; border: none; border-radius: 6px; padding: 8px 12px; font-size: 12px; cursor: pointer;">Skip</button>
+                    <button onclick="hideSuggestions()" style="background: rgba(255,255,255,0.1); color: white; border: none; border-radius: 6px; padding: 8px 12px; font-size: 12px; cursor: pointer;">&times;</button>
+                </div>
+            </div>
+            
+            <div class="chat-input-area">
+                <div class="input-container">
+                    <button onclick="toggleVoiceOutput()" id="voiceOutputToggle" style="background: #8C8C8C; border: none; color: white; padding: 8px; border-radius: 4px; cursor: pointer;">🔇</button>
+                    <input type="text" class="input-field" placeholder="Message Aurora..." id="messageInput">
+                    <button style="background: none; border: none; color: #8C8C8C; padding: 8px;" id="voiceButton" onclick="toggleVoiceInput()">🎤</button>
+                    <button class="send-button" id="send-button" onclick="sendMessage()">→</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mood Tracker -->
+        <div id="mood-content" class="content hidden">
+            <div class="mood-header">
+                <h1>💗 Mood Tracker</h1>
+                <p>How are you feeling today?</p>
+            </div>
+            
+            <div class="mood-content">
+                <div class="mood-checkin">
+                    <h3>Daily Check-in</h3>
+                    <div class="mood-scale">
+                        <label>Mood Level</label>
+                        <div class="mood-emojis">
+                            <span class="mood-emoji" onclick="setMood(1)">😢</span>
+                            <span class="mood-emoji" onclick="setMood(3)">😕</span>
+                            <span class="mood-emoji" onclick="setMood(5)">😐</span>
+                            <span class="mood-emoji selected" onclick="setMood(7)">😊</span>
+                            <span class="mood-emoji" onclick="setMood(9)">😄</span>
+                        </div>
+                        <input type="range" class="mood-slider" min="1" max="10" value="7">
+                    </div>
+                    
+                    <div class="mood-scale">
+                        <label>Energy Level</label>
+                        <div class="mood-emojis">
+                            <span class="energy-emoji" onclick="setEnergy(1)">🔋</span>
+                            <span class="energy-emoji" onclick="setEnergy(3)">🔋</span>
+                            <span class="energy-emoji" onclick="setEnergy(5)">🔋</span>
+                            <span class="energy-emoji selected" onclick="setEnergy(7)">⚡</span>
+                            <span class="energy-emoji" onclick="setEnergy(9)">⚡</span>
+                        </div>
+                        <input type="range" class="mood-slider" min="1" max="10" value="6">
+                    </div>
+                    
+                    <textarea placeholder="How was your day? (optional)" style="width: 100%; padding: 12px; border: 1px solid #E8E8E8; border-radius: 8px; resize: none; margin-top: 12px;"></textarea>
+                    
+                    <button onclick="saveMoodCheckIn()" style="width: 100%; background: #FF4D4F; color: white; border: none; border-radius: 8px; padding: 12px; margin-top: 12px; cursor: pointer;">Save Check-in</button>
+                </div>
+                
+                <div class="mood-checkin">
+                    <h3>This Week's Overview</h3>
+                    <div style="display: flex; justify-content: space-between; margin: 16px 0;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 20px;">😊</div>
+                            <div style="font-size: 12px; color: #8C8C8C;">Mon</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 20px;">😄</div>
+                            <div style="font-size: 12px; color: #8C8C8C;">Tue</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 20px;">😐</div>
+                            <div style="font-size: 12px; color: #8C8C8C;">Wed</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 20px;">😊</div>
+                            <div style="font-size: 12px; color: #8C8C8C;">Thu</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 20px;">😕</div>
+                            <div style="font-size: 12px; color: #8C8C8C;">Fri</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 20px;">😄</div>
+                            <div style="font-size: 12px; color: #8C8C8C;">Sat</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 20px;">😊</div>
+                            <div style="font-size: 12px; color: #8C8C8C;">Sun</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mood Visualization Charts -->
+                <div class="mood-checkin" style="margin-top: 16px;">
+                    <h3>Mood Trends</h3>
+                    <canvas id="moodChart" width="400" height="200"></canvas>
+                </div>
+                
+                <div class="mood-checkin" style="margin-top: 16px;">
+                    <h3>Energy Patterns</h3>
+                    <canvas id="energyChart" width="400" height="150"></canvas>
+                </div>
+                
+                <div class="mood-checkin" style="margin-top: 16px;">
+                    <h3>Insights & Recommendations</h3>
+                    <div id="moodInsights" style="padding: 12px; background: #F5F7FA; border-radius: 8px;">
+                        <p style="margin-bottom: 8px;">Loading insights...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar View -->
+        <div id="calendar-content" class="content hidden">
+            <div class="calendar-header">
+                <div class="calendar-nav">
+                    <button class="nav-button" onclick="navigateCalendar(-1)">‹</button>
+                    <h2 id="calendar-month">January 2024</h2>
+                    <button class="nav-button" onclick="navigateCalendar(1)">›</button>
+                </div>
+                <p>Smart scheduling with AI insights</p>
+            </div>
+            
+            <div style="background: white; padding: 8px 0;">
+                <div style="display: flex; justify-content: space-around; padding: 8px 16px; font-size: 12px; color: #8C8C8C; font-weight: 500;">
+                    <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                </div>
+            </div>
+            
+            <div class="calendar-grid">
+                <div class="calendar-day">31</div>
+                <div class="calendar-day">1</div>
+                <div class="calendar-day">2</div>
+                <div class="calendar-day">3</div>
+                <div class="calendar-day">4</div>
+                <div class="calendar-day">5</div>
+                <div class="calendar-day">6</div>
+                <div class="calendar-day">7</div>
+                <div class="calendar-day today">8</div>
+                <div class="calendar-day">9</div>
+                <div class="calendar-day">10</div>
+                <div class="calendar-day">11</div>
+                <div class="calendar-day">12</div>
+                <div class="calendar-day">13</div>
+                <div class="calendar-day">14</div>
+                <div class="calendar-day">15</div>
+                <div class="calendar-day">16</div>
+                <div class="calendar-day">17</div>
+                <div class="calendar-day">18</div>
+                <div class="calendar-day">19</div>
+                <div class="calendar-day">20</div>
+            </div>
+            
+            <div style="padding: 0 16px;">
+                <div style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <h3 style="color: #262626; margin: 0;">Today's Schedule</h3>
+                        <button onclick="toggleQuickReschedule()" id="quickRescheduleBtn" style="background: #4A90E2; color: white; border: none; border-radius: 6px; padding: 4px 8px; font-size: 11px; cursor: pointer;">Quick Reschedule</button>
+                    </div>
+                    <div id="calendar-events-container">
+                        <!-- Events will be populated here by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Quick Reschedule Panel -->
+                <div id="quick-reschedule-panel" style="display: none; background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border: 2px solid #4A90E2;">
+                    <h4 style="color: #262626; margin-bottom: 12px; display: flex; align-items: center;">
+                        🔄 Quick Reschedule
+                        <button onclick="toggleQuickReschedule()" style="background: none; border: none; margin-left: auto; cursor: pointer; color: #8C8C8C;">&times;</button>
+                    </h4>
+                    <div style="margin-bottom: 12px;">
+                        <label style="display: block; font-size: 12px; color: #8C8C8C; margin-bottom: 4px;">Move event:</label>
+                        <select id="reschedule-event-select" style="width: 100%; padding: 8px; border: 1px solid #D9D9D9; border-radius: 6px; background: white;">
+                            <option value="">Select an event to reschedule</option>
+                        </select>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+                        <div>
+                            <label style="display: block; font-size: 12px; color: #8C8C8C; margin-bottom: 4px;">New Date:</label>
+                            <input type="date" id="reschedule-date" style="width: 100%; padding: 8px; border: 1px solid #D9D9D9; border-radius: 6px;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 12px; color: #8C8C8C; margin-bottom: 4px;">New Time:</label>
+                            <input type="time" id="reschedule-time" style="width: 100%; padding: 8px; border: 1px solid #D9D9D9; border-radius: 6px;">
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+                        <button onclick="suggestReschedule('tomorrow')" style="background: #F5F7FA; border: 1px solid #D9D9D9; border-radius: 6px; padding: 8px; font-size: 12px; cursor: pointer;">Tomorrow</button>
+                        <button onclick="suggestReschedule('nextWeek')" style="background: #F5F7FA; border: 1px solid #D9D9D9; border-radius: 6px; padding: 8px; font-size: 12px; cursor: pointer;">Next Week</button>
+                        <button onclick="suggestReschedule('nextMonth')" style="background: #F5F7FA; border: 1px solid #D9D9D9; border-radius: 6px; padding: 8px; font-size: 12px; cursor: pointer;">Next Month</button>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button onclick="executeReschedule()" style="background: #52C41A; color: white; border: none; border-radius: 6px; padding: 10px 16px; font-size: 14px; cursor: pointer; flex: 1;">Reschedule Event</button>
+                        <button onclick="cancelReschedule()" style="background: #FF4D4F; color: white; border: none; border-radius: 6px; padding: 10px 16px; font-size: 14px; cursor: pointer;">Cancel</button>
+                    </div>
+                </div>
+
+                <!-- Autonomous Scheduling Panel -->
+                <div style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h3 style="color: #262626; margin: 0;">🧠 Autonomous Scheduling</h3>
+                        <button onclick="generateSchedule()" style="background: #52C41A; color: white; border: none; border-radius: 6px; padding: 6px 12px; font-size: 12px; cursor: pointer;">Generate Schedule</button>
+                    </div>
+                    <div id="autonomous-schedule-content">
+                        <p style="font-size: 14px; color: #8C8C8C; margin: 0;">Let Aurora intelligently schedule your tasks based on your energy patterns, calendar, and priorities.</p>
+                        
+                        <div id="schedule-suggestions" style="margin-top: 12px; display: none;">
+                            <div id="schedule-loading" style="text-align: center; padding: 20px; display: none;">
+                                <div style="display: inline-block; width: 24px; height: 24px; border: 2px solid #f3f3f3; border-top: 2px solid #52C41A; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                                <p style="margin-top: 8px; font-size: 12px; color: #8C8C8C;">Analyzing your patterns...</p>
+                            </div>
+                            <div id="schedule-results"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- AI Calendar Management Panel -->
+                <div class="ai-calendar-panel" style="background: white; border-radius: 12px; padding: 16px; margin-top: 16px; border: 1px solid #E8E8E8;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h3 style="font-size: 16px; color: #262626;">🤖 AI Calendar Assistant</h3>
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="generateHourlySchedule()" style="background: #4A90E2; color: white; border: none; border-radius: 6px; padding: 6px 12px; font-size: 12px; cursor: pointer;">Today's Plan</button>
+                            <button onclick="optimizeWeek()" style="background: #722ED1; color: white; border: none; border-radius: 6px; padding: 6px 12px; font-size: 12px; cursor: pointer;">Optimize Week</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Smart Event Creation -->
+                    <div class="smart-event-section" style="margin-bottom: 16px;">
+                        <h4 style="font-size: 14px; color: #262626; margin-bottom: 8px;">Quick Add Event</h4>
+                        <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+                            <input type="text" id="smart-event-title" placeholder="What do you want to work on?" style="flex: 1; padding: 8px; border: 1px solid #D9D9D9; border-radius: 6px; font-size: 12px;">
+                            <select id="smart-event-duration" style="padding: 8px; border: 1px solid #D9D9D9; border-radius: 6px; font-size: 12px;">
+                                <option value="30">30 min</option>
+                                <option value="60" selected>1 hour</option>
+                                <option value="90">1.5 hours</option>
+                                <option value="120">2 hours</option>
+                            </select>
+                            <button onclick="createSmartEvent()" style="background: #52C41A; color: white; border: none; border-radius: 6px; padding: 8px 12px; font-size: 12px; cursor: pointer;">AI Schedule</button>
+                        </div>
+                        <div style="display: flex; gap: 8px; font-size: 11px;">
+                            <button onclick="setEventType('goal_work')" class="event-type-btn" data-type="goal_work" style="background: #F0F9FF; color: #1890FF; border: 1px solid #BAE7FF; border-radius: 4px; padding: 4px 8px; cursor: pointer;">Goal Work</button>
+                            <button onclick="setEventType('deep_work')" class="event-type-btn" data-type="deep_work" style="background: #F6FFED; color: #52C41A; border: 1px solid #B7EB8F; border-radius: 4px; padding: 4px 8px; cursor: pointer;">Deep Work</button>
+                            <button onclick="setEventType('meeting')" class="event-type-btn" data-type="meeting" style="background: #FFF7E6; color: #FA8C16; border: 1px solid #FFD591; border-radius: 4px; padding: 4px 8px; cursor: pointer;">Meeting</button>
+                            <button onclick="setEventType('learning')" class="event-type-btn" data-type="learning" style="background: #F9F0FF; color: #722ED1; border: 1px solid #D3ADF7; border-radius: 4px; padding: 4px 8px; cursor: pointer;">Learning</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Today's AI Schedule -->
+                    <div id="ai-schedule-today" class="ai-schedule-section" style="display: none;">
+                        <h4 style="font-size: 14px; color: #262626; margin-bottom: 8px;">📅 Today's AI Schedule</h4>
+                        <div id="hourly-schedule-content" style="max-height: 200px; overflow-y: auto;">
+                            <!-- Hourly schedule will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Weekly Optimization Results -->
+                    <div id="weekly-optimization" class="optimization-section" style="display: none;">
+                        <h4 style="font-size: 14px; color: #262626; margin-bottom: 8px;">📊 Weekly Optimization</h4>
+                        <div id="optimization-content">
+                            <!-- Optimization results will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Goal-Based Scheduling -->
+                    <div class="goal-scheduling-section" style="margin-top: 16px;">
+                        <h4 style="font-size: 14px; color: #262626; margin-bottom: 8px;">🎯 Schedule Goal Time</h4>
+                        <button onclick="scheduleGoalTime()" style="background: linear-gradient(135deg, #4A90E2, #722ED1); color: white; border: none; border-radius: 6px; padding: 8px 16px; font-size: 12px; cursor: pointer; width: 100%;">Auto-Schedule Time for All Goals</button>
+                        <div id="goal-scheduling-results" style="margin-top: 8px; font-size: 11px; color: #8C8C8C;">
+                            <!-- Results will appear here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Goals Dashboard -->
+        <div id="goals-content" class="content hidden">
+            <div class="goals-header">
+                <h1>🎯 Goals Dashboard</h1>
+                <p>Track your progress and achieve your dreams</p>
+            </div>
+            
+            <div style="padding: 16px;" id="goals-list">
+                <!-- Goals will be populated here by JavaScript -->
+            </div>
+            
+            <!-- Task Breakdown Modal -->
+            <div id="task-breakdown-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+                <div style="background: white; border-radius: 16px; padding: 24px; max-width: 380px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h3 id="breakdown-goal-title" style="font-size: 18px; color: #262626;">Goal Breakdown</h3>
+                        <button onclick="closeTaskBreakdown()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #8C8C8C;">&times;</button>
+                    </div>
+                    <div id="task-breakdown-loading" style="text-align: center; padding: 40px; display: none;">
+                        <div style="display: inline-block; width: 40px; height: 40px; border: 3px solid #f3f3f3; border-top: 3px solid #4A90E2; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                        <p style="margin-top: 16px; color: #8C8C8C;">AI is creating your action plan...</p>
+                    </div>
+                    <div id="task-breakdown-content">
+                        <!-- Tasks will be populated here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Next Task Suggestion -->
+            <div id="next-task-suggestion" style="display: none; background: linear-gradient(135deg, #4A90E2, #722ED1); color: white; border-radius: 12px; padding: 16px; margin: 16px; box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);">
+                <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 18px; margin-right: 8px;">💡</span>
+                    <h3 style="font-size: 14px; font-weight: 600;">Recommended Next Task</h3>
+                </div>
+                <div id="suggested-task-content"></div>
+                <button id="start-suggested-task" onclick="startSuggestedTask()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 8px 16px; margin-top: 12px; cursor: pointer; font-size: 12px;">Start This Task</button>
+            </div>
+            
+            <!-- Add Goal Form -->
+            <div id="add-goal-form" style="display: none; background: white; border: 1px solid #E8E8E8; border-radius: 12px; padding: 16px; margin: 16px;">
+                <h3 style="margin-bottom: 16px; color: #262626;">Add New Goal</h3>
+                <input type="text" id="goal-title-input" placeholder="Goal title" style="width: 100%; padding: 12px; border: 1px solid #D9D9D9; border-radius: 8px; margin-bottom: 12px;">
+                <textarea id="goal-description-input" placeholder="Goal description (optional)" style="width: 100%; padding: 12px; border: 1px solid #D9D9D9; border-radius: 8px; margin-bottom: 12px; height: 80px; resize: vertical;"></textarea>
+                <select id="goal-category-input" style="width: 100%; padding: 12px; border: 1px solid #D9D9D9; border-radius: 8px; margin-bottom: 12px;">
+                    <option value="personal">Personal</option>
+                    <option value="career">Career</option>
+                    <option value="health">Health</option>
+                    <option value="learning">Learning</option>
+                    <option value="financial">Financial</option>
+                    <option value="relationship">Relationship</option>
+                    <option value="other">Other</option>
+                </select>
+                <input type="date" id="goal-target-date-input" style="width: 100%; padding: 12px; border: 1px solid #D9D9D9; border-radius: 8px; margin-bottom: 16px;">
+                <div style="display: flex; gap: 8px;">
+                    <button onclick="cancelAddGoal()" style="flex: 1; background: #F5F5F5; color: #262626; border: none; border-radius: 8px; padding: 12px; cursor: pointer;">Cancel</button>
+                    <button onclick="saveNewGoal()" style="flex: 1; background: #52C41A; color: white; border: none; border-radius: 8px; padding: 12px; cursor: pointer;">Save Goal</button>
+                </div>
+            </div>
+            
+            <button id="add-goal-btn" onclick="showAddGoalForm()" style="width: 100%; background: #52C41A; color: white; border: none; border-radius: 8px; padding: 12px; margin: 0 16px 16px 16px; cursor: pointer;">+ Add New Goal</button>
+        </div>
+
+        <!-- Profile Settings -->
+        <div id="profile-content" class="content hidden">
+            <div class="profile-header">
+                <h1>👤 Profile</h1>
+                <p>Settings and integrations</p>
+            </div>
+            
+            <div style="padding: 16px;">
+                <div class="profile-section">
+                    <h3>Google Calendar Integration</h3>
+                    <p style="font-size: 14px; color: #8C8C8C; margin: 8px 0;">Connect your Google Calendar for smart scheduling and AI insights.</p>
+                    <button class="connect-button" onclick="connectCalendar()">📅 Connect Google Calendar</button>
+                </div>
+                
+                <div class="profile-section">
+                    <h3>Notifications</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin: 12px 0;">
+                        <span>Daily mood check-ins</span>
+                        <label style="position: relative; display: inline-block; width: 44px; height: 24px;">
+                            <input type="checkbox" checked style="opacity: 0; width: 0; height: 0;">
+                            <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #4A90E2; transition: .4s; border-radius: 24px; background: #4A90E2;"></span>
+                            <span style="position: absolute; content: ''; height: 18px; width: 18px; left: 23px; bottom: 3px; background: white; transition: .4s; border-radius: 50%;"></span>
+                        </label>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin: 12px 0;">
+                        <span>Goal reminders</span>
+                        <label style="position: relative; display: inline-block; width: 44px; height: 24px;">
+                            <input type="checkbox" checked style="opacity: 0; width: 0; height: 0;">
+                            <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #4A90E2; transition: .4s; border-radius: 24px;"></span>
+                            <span style="position: absolute; content: ''; height: 18px; width: 18px; left: 23px; bottom: 3px; background: white; transition: .4s; border-radius: 50%;"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="profile-section">
+                    <h3>AI Preferences</h3>
+                    <p style="font-size: 14px; color: #8C8C8C; margin: 8px 0;">Customize how Aurora interacts with you.</p>
+                    <select style="width: 100%; padding: 8px; border: 1px solid #D9D9D9; border-radius: 6px;">
+                        <option>Supportive & Encouraging</option>
+                        <option>Direct & Focused</option>
+                        <option>Casual & Friendly</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav">
+            <div class="nav-item active" data-tab="chat">
+                <div class="nav-icon"></div>
+                <div class="nav-label">Chat</div>
+            </div>
+            <div class="nav-item" data-tab="calendar">
+                <div class="nav-icon"></div>
+                <div class="nav-label">Calendar</div>
+            </div>
+            <div class="nav-item" data-tab="goals">
+                <div class="nav-icon"></div>
+                <div class="nav-label">Goals</div>
+            </div>
+            <div class="nav-item" data-tab="mood">
+                <div class="nav-icon"></div>
+                <div class="nav-label">Mood</div>
+            </div>
+            <div class="nav-item" data-tab="profile">
+                <div class="nav-icon"></div>
+                <div class="nav-label">Profile</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // Remove active class from all tabs
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Hide all content
+                document.querySelectorAll('.content').forEach(content => content.classList.add('hidden'));
+                
+                // Show selected content
+                const tab = this.dataset.tab;
+                document.getElementById(tab + '-content').classList.remove('hidden');
+            });
+        });
+
+        // Backend Configuration
+        const backendUrl = 'http://127.0.0.1:8000';  // Backend server URL
+        
+        // Global error handler for API calls with retry logic
+        async function apiCall(url, options = {}, retries = 3) {
+            let lastError;
+            
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const controller = new AbortController();
+                    const timeout = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+                    
+                    const response = await fetch(url, {
+                        ...options,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...options.headers
+                        },
+                        signal: controller.signal
+                    });
+                    
+                    clearTimeout(timeout);
+                    
+                    if (!response.ok) {
+                        if (response.status >= 500 && i < retries - 1) {
+                            // Server error, retry after delay
+                            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+                            continue;
+                        }
+                        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+                    }
+                    
+                    return await response.json();
+                } catch (error) {
+                    lastError = error;
+                    console.error(`API Call Failed (attempt ${i + 1}/${retries}):`, error);
+                    
+                    if (error.name === 'AbortError') {
+                        lastError = new Error('Request timeout');
+                    }
+                    
+                    if (i < retries - 1) {
+                        // Wait before retry with exponential backoff
+                        await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+                    }
+                }
+            }
+            
+            showNotification(`Connection error: ${lastError.message}`, 'error');
+            throw lastError;
+        }
+        
+        // Show notification helper
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 16px 24px;
+                background: ${type === 'error' ? '#ff4444' : type === 'success' ? '#52c41a' : '#1890ff'};
+                color: white;
+                border-radius: 8px;
+                z-index: 1000;
+                animation: slideIn 0.3s ease-out;
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+        
+        // Mood Tracking Functions
+        async function saveMoodCheckIn() {
+            try {
+                // Get mood and energy values
+                const moodElement = document.querySelector('.mood-emoji.selected');
+                const energyElement = document.querySelector('.energy-emoji.selected');
+                const notesTextarea = document.querySelector('textarea[placeholder="How was your day? (optional)"]');
+                
+                if (!moodElement || !energyElement) {
+                    showNotification('Please select both mood and energy levels', 'error');
+                    return;
+                }
+                
+                const moodLevel = parseInt(moodElement.dataset.value || '5');
+                const energyLevel = parseInt(energyElement.dataset.value || '5');
+                const notes = notesTextarea ? notesTextarea.value.trim() : '';
+                
+                const data = await apiCall(`${backendUrl}/api/mood/track`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        user_id: 1,
+                        mood_level: moodLevel,
+                        energy_level: energyLevel,
+                        notes: notes
+                    })
+                });
+                
+                showNotification('Mood check-in saved successfully!', 'success');
+                
+                // Clear selections and notes
+                document.querySelectorAll('.mood-emoji.selected, .energy-emoji.selected').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                if (notesTextarea) notesTextarea.value = '';
+                
+                // Refresh mood analytics if on that tab
+                if (document.getElementById('mood-content').style.display !== 'none') {
+                    loadMoodAnalytics();
+                }
+                
+            } catch (error) {
+                console.error('Error saving mood check-in:', error);
+                showNotification('Failed to save mood check-in', 'error');
+            }
+        }
+        
+        function setMood(level) {
+            document.querySelectorAll('.mood-emoji').forEach(el => el.classList.remove('selected'));
+            event.target.classList.add('selected');
+            event.target.dataset.value = level;
+        }
+        
+        function setEnergy(level) {
+            document.querySelectorAll('.energy-emoji').forEach(el => el.classList.remove('selected'));
+            event.target.classList.add('selected');
+            event.target.dataset.value = level;
+        }
+        
+        // Calendar Navigation
+        let currentCalendarDate = new Date();
+        
+        function navigateCalendar(direction) {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + direction);
+            updateCalendarDisplay();
+        }
+        
+        function updateCalendarDisplay() {
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'];
+            const monthElement = document.getElementById('calendar-month');
+            if (monthElement) {
+                monthElement.textContent = `${monthNames[currentCalendarDate.getMonth()]} ${currentCalendarDate.getFullYear()}`;
+            }
+            // Here you could add logic to refresh calendar events for the new month
+            loadCalendarEvents();
+        }
+
+        // Chat Functions
+        async function sendMessage(message) {
+            try {
+                console.log('sendMessage called with:', message);
+                const input = document.getElementById('messageInput');
+                if (!input) {
+                    console.error('Message input not found!');
+                    return;
+                }
+                
+                const messageText = message || input.value.trim();
+                console.log('Message text:', messageText);
+                
+                if (!messageText) {
+                    console.log('No message text, returning');
+                    return;
+                }
+                
+                const chatMessages = document.querySelector('.chat-messages');
+                if (!chatMessages) {
+                    console.error('Chat messages container not found!');
+                    return;
+                }
+                
+                // Show loading state on send button
+                const sendButton = document.getElementById('send-button');
+                if (sendButton) {
+                    sendButton.disabled = true;
+                    sendButton.style.opacity = '0.5';
+                    sendButton.innerHTML = '⏳';
+                }
+            
+            // Add user message
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user';
+            userMessage.innerHTML = `<div class="message-bubble">${messageText}</div>`;
+            chatMessages.appendChild(userMessage);
+            
+            // Show typing indicator
+            const typingIndicator = document.createElement('div');
+            typingIndicator.className = 'message ai typing';
+            typingIndicator.innerHTML = `
+                <div class="message-bubble">
+                    <div class="typing-indicator">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            `;
+            chatMessages.appendChild(typingIndicator);
+            
+            // Try intelligent goal coaching first
+            try {
+                const coachingResult = await apiCall(`${backendUrl}/api/coaching/coach`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        message: messageText,
+                        user_id: 1,
+                        include_history: true
+                    })
+                });
+                
+                typingIndicator.remove();
+                    
+                    let responseMessage = coachingResult.response;
+                    let quickReplies = '';
+                    
+                    // Create contextual quick replies based on coaching type
+                    if (coachingResult.suggestions && coachingResult.suggestions.length > 0) {
+                        quickReplies = `
+                            <div class="quick-replies">
+                                ${coachingResult.suggestions.slice(0, 3).map(suggestion => 
+                                    `<button class="quick-reply" onclick="sendMessage('${suggestion}')">${suggestion}</button>`
+                                ).join('')}
+                            </div>
+                        `;
+                    }
+                    
+                    // Add task creation option if tasks are suggested
+                    if (coachingResult.suggested_tasks && coachingResult.suggested_tasks.length > 0) {
+                        quickReplies += `
+                            <div style="margin-top: 8px; padding: 8px; background: rgba(74, 144, 226, 0.1); border-radius: 6px;">
+                                <div style="font-size: 12px; margin-bottom: 4px; color: #4A90E2;">💡 I can create ${coachingResult.suggested_tasks.length} specific tasks for you:</div>
+                                ${coachingResult.suggested_tasks.slice(0, 2).map(task => 
+                                    `<div style="font-size: 11px; margin-bottom: 2px;">• ${task.title} (${task.estimated_minutes}min)</div>`
+                                ).join('')}
+                                <button onclick="createSuggestedTasks(${JSON.stringify(coachingResult.suggested_tasks).replace(/"/g, '&quot;')})" 
+                                        style="background: #4A90E2; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 11px; margin-top: 4px; cursor: pointer;">
+                                    Create These Tasks
+                                </button>
+                            </div>
+                        `;
+                    }
+                    
+                    // Add goal creation option if suggested
+                    if (coachingResult.suggested_goal) {
+                        quickReplies += `
+                            <div style="margin-top: 8px; padding: 8px; background: rgba(82, 196, 26, 0.1); border-radius: 6px;">
+                                <div style="font-size: 12px; margin-bottom: 4px; color: #52C41A;">🎯 Create this as a trackable goal?</div>
+                                <button onclick="createSuggestedGoal('${coachingResult.suggested_goal.title}', '${coachingResult.suggested_goal.category}')" 
+                                        style="background: #52C41A; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 11px; cursor: pointer;">
+                                    Create Goal
+                                </button>
+                            </div>
+                        `;
+                    }
+                    
+                    const aiMessage = document.createElement('div');
+                    aiMessage.className = 'message ai';
+                    aiMessage.innerHTML = `
+                        <div class="message-bubble">
+                            ${responseMessage}
+                            ${quickReplies}
+                        </div>
+                    `;
+                    chatMessages.appendChild(aiMessage);
+                    
+                    // Clear input only after successful response
+                    if (!message) { // Only clear if not called with predefined message
+                        input.value = '';
+                    }
+                    
+                    // Reset send button
+                    const sendButton = document.getElementById('send-button');
+                    if (sendButton) {
+                        sendButton.disabled = false;
+                        sendButton.style.opacity = '1';
+                        sendButton.innerHTML = '→';
+                    }
+                    
+                    // Speak the response if voice output is enabled
+                    speakText(responseMessage);
+                    
+                    // Scroll to bottom
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                    return;
+                }
+            } catch (error) {
+                console.log('Coaching failed, trying voice commands:', error);
+            }
+            
+            // Fallback to voice commands
+            try {
+                const voiceResponse = await fetch(`${backendUrl}/api/voice/execute`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        command: messageText,
+                        user_id: 1
+                    })
+                });
+                
+                if (voiceResponse.ok) {
+                    const voiceResult = await voiceResponse.json();
+                    typingIndicator.remove();
+                    
+                    let responseMessage = voiceResult.message;
+                    let quickReplies = '';
+                    
+                    // Add contextual quick replies based on action
+                    if (voiceResult.action === 'create_goal') {
+                        quickReplies = `
+                            <div class="quick-replies">
+                                <button class="quick-reply" onclick="sendMessage('Break down this goal into tasks')">Break into tasks</button>
+                                <button class="quick-reply" onclick="sendMessage('Show my goals')">Show all goals</button>
+                            </div>
+                        `;
+                    } else if (voiceResult.action === 'log_mood') {
+                        quickReplies = `
+                            <div class="quick-replies">
+                                <button class="quick-reply" onclick="sendMessage('What tasks match my energy?')">What tasks match my energy?</button>
+                                <button class="quick-reply" onclick="sendMessage('Show mood history')">Show mood history</button>
+                            </div>
+                        `;
+                    } else if (voiceResult.action === 'show_schedule') {
+                        if (voiceResult.data && voiceResult.data.events && voiceResult.data.events.length > 0) {
+                            responseMessage += '<br><br><strong>Upcoming Events:</strong><br>';
+                            voiceResult.data.events.forEach(event => {
+                                responseMessage += `• ${event.title} at ${event.start_time}<br>`;
+                            });
+                        }
+                        quickReplies = `
+                            <div class="quick-replies">
+                                <button class="quick-reply" onclick="sendMessage('Reschedule next meeting')">Reschedule meeting</button>
+                                <button class="quick-reply" onclick="sendMessage('Add calendar event')">Add event</button>
+                            </div>
+                        `;
+                    } else if (voiceResult.action === 'show_goals') {
+                        if (voiceResult.data && voiceResult.data.goals && voiceResult.data.goals.length > 0) {
+                            responseMessage += '<br><br><strong>Your Goals:</strong><br>';
+                            voiceResult.data.goals.forEach(goal => {
+                                responseMessage += `• ${goal.title} (${goal.progress}% complete)<br>`;
+                            });
+                        }
+                        quickReplies = `
+                            <div class="quick-replies">
+                                <button class="quick-reply" onclick="sendMessage('Create new goal')">Create new goal</button>
+                                <button class="quick-reply" onclick="sendMessage('Show next task')">Show next task</button>
+                            </div>
+                        `;
+                    } else if (voiceResult.action === 'suggest_task') {
+                        if (voiceResult.data && voiceResult.data.task) {
+                            responseMessage += `<br><br><strong>Task Details:</strong><br>Priority: ${voiceResult.data.task.priority}<br>Description: ${voiceResult.data.task.description || 'No description'}`;
+                        }
+                        quickReplies = `
+                            <div class="quick-replies">
+                                <button class="quick-reply" onclick="sendMessage('Start this task')">Start this task</button>
+                                <button class="quick-reply" onclick="sendMessage('Show all my tasks')">Show all tasks</button>
+                            </div>
+                        `;
+                    } else {
+                        // Default quick replies for general commands
+                        quickReplies = `
+                            <div class="quick-replies">
+                                <button class="quick-reply" onclick="sendMessage('Show my schedule')">Show schedule</button>
+                                <button class="quick-reply" onclick="sendMessage('Review my goals')">Review goals</button>
+                                <button class="quick-reply" onclick="sendMessage('What should I do next?')">What's next?</button>
+                            </div>
+                        `;
+                    }
+                    
+                    const aiMessage = document.createElement('div');
+                    aiMessage.className = 'message ai';
+                    aiMessage.innerHTML = `
+                        <div class="message-bubble">
+                            ${responseMessage}
+                            ${quickReplies}
+                        </div>
+                    `;
+                    chatMessages.appendChild(aiMessage);
+                    
+                    // Clear input only after successful response
+                    if (!message) { // Only clear if not called with predefined message
+                        input.value = '';
+                    }
+                    
+                    // Reset send button
+                    const sendButton = document.getElementById('send-button');
+                    if (sendButton) {
+                        sendButton.disabled = false;
+                        sendButton.style.opacity = '1';
+                        sendButton.innerHTML = '→';
+                    }
+                    
+                    // Speak the response if voice output is enabled
+                    speakText(responseMessage);
+                    
+                    // Scroll to bottom
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                    return;
+                }
+            } catch (error) {
+                console.log('Voice command failed, falling back to regular chat:', error);
+            }
+            
+            // Fallback to regular chat if voice command fails
+            setTimeout(() => {
+                typingIndicator.remove();
+                
+                const responses = [
+                    "I'm here to help! Try saying things like 'feeling 7/10', 'create goal exercise daily', or 'what's next?' for quick actions.",
+                    "I can help you manage goals, tasks, and schedule. Try voice commands like 'show my goals' or 'add task call dentist'.",
+                    "Let's make today productive! You can ask me to create goals, log your mood, or show your schedule.",
+                    "I understand natural language! Try commands like 'I want to start exercising' or 'what should I do next?'"
+                ];
+                
+                const aiMessage = document.createElement('div');
+                aiMessage.className = 'message ai';
+                aiMessage.innerHTML = `
+                    <div class="message-bubble">
+                        ${responses[Math.floor(Math.random() * responses.length)]}
+                        <div class="quick-replies">
+                            <button class="quick-reply" onclick="sendMessage('feeling 8/10')">Log mood</button>
+                            <button class="quick-reply" onclick="sendMessage('create goal learn Spanish')">Create goal</button>
+                            <button class="quick-reply" onclick="sendMessage('what should I do next?')">What's next?</button>
+                        </div>
+                    </div>
+                `;
+                chatMessages.appendChild(aiMessage);
+                
+                // Speak fallback response if voice output is enabled
+                const fallbackText = responses[Math.floor(Math.random() * responses.length)];
+                speakText(fallbackText);
+                
+                // Scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 1000);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            } catch (error) {
+                console.error('Error in sendMessage:', error);
+                showNotification('Failed to send message. Please try again.', 'error');
+                
+                // Reset send button
+                const sendButton = document.getElementById('send-button');
+                if (sendButton) {
+                    sendButton.disabled = false;
+                    sendButton.style.opacity = '1';
+                    sendButton.innerHTML = '→';
+                }
+                
+                // Remove typing indicator if it exists
+                const typingIndicator = document.querySelector('.typing');
+                if (typingIndicator) {
+                    typingIndicator.remove();
+                }
+            }
+        }
+
+        // Enter key for chat - wrapped in DOMContentLoaded to ensure element exists
+        document.addEventListener('DOMContentLoaded', function() {
+            const messageInput = document.getElementById('messageInput');
+            if (messageInput) {
+                messageInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendMessage();
+                    }
+                });
+            } else {
+                console.error('Message input element not found!');
+            }
+        });
+
+        // Voice Input Functions
+        let isRecording = false;
+        let recognition = null;
+
+        function initSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+                
+                recognition.onstart = function() {
+                    isRecording = true;
+                    const voiceButton = document.getElementById('voiceButton');
+                    voiceButton.style.color = '#4A90E2';
+                    voiceButton.innerHTML = '🔴';
+                    document.getElementById('messageInput').placeholder = 'Listening...';
+                };
+                
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    document.getElementById('messageInput').value = transcript;
+                    sendMessage(transcript);
+                };
+                
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error:', event.error);
+                    resetVoiceButton();
+                    if (event.error === 'not-allowed') {
+                        alert('Microphone access denied. Please enable microphone permissions to use voice input.');
+                    }
+                };
+                
+                recognition.onend = function() {
+                    resetVoiceButton();
+                };
+            }
+        }
+
+        function toggleVoiceInput() {
+            if (!recognition) {
+                initSpeechRecognition();
+            }
+            
+            if (!recognition) {
+                alert('Speech recognition is not supported in your browser. Please try Chrome or Edge.');
+                return;
+            }
+            
+            if (isRecording) {
+                recognition.stop();
+            } else {
+                try {
+                    recognition.start();
+                } catch (error) {
+                    console.error('Failed to start speech recognition:', error);
+                    resetVoiceButton();
+                }
+            }
+        }
+
+        function resetVoiceButton() {
+            isRecording = false;
+            const voiceButton = document.getElementById('voiceButton');
+            voiceButton.style.color = '#8C8C8C';
+            voiceButton.innerHTML = '🎤';
+            document.getElementById('messageInput').placeholder = 'Message Aurora...';
+        }
+
+        // Text-to-Speech Functions
+        let speechSynthesis = window.speechSynthesis;
+        let voiceEnabled = false;
+
+        function toggleVoiceOutput() {
+            voiceEnabled = !voiceEnabled;
+            const btn = document.getElementById('voiceOutputToggle');
+            if (btn) {
+                btn.textContent = voiceEnabled ? '🔊' : '🔇';
+                btn.style.background = voiceEnabled ? '#52C41A' : '#8C8C8C';
+            }
+            
+            if (voiceEnabled) {
+                speakText("Voice output enabled. I'll now speak my responses.");
+            }
+        }
+
+        function speakText(text) {
+            if (!voiceEnabled || !speechSynthesis) return;
+            
+            // Stop any current speech
+            speechSynthesis.cancel();
+            
+            // Clean text for speech (remove emojis and HTML)
+            const cleanText = text.replace(/<[^>]*>/g, ' ')
+                                 .replace(/[🎯📅✅💡🔄📊🎉⚡]/g, '')
+                                 .replace(/\s+/g, ' ')
+                                 .trim();
+            
+            if (cleanText.length < 3) return; // Skip very short responses
+            
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.rate = 0.9;
+            utterance.pitch = 1;
+            utterance.volume = 0.8;
+            
+            // Try to use a pleasant voice
+            const voices = speechSynthesis.getVoices();
+            const femaleVoice = voices.find(voice => 
+                voice.name.includes('Female') || 
+                voice.name.includes('Zira') || 
+                voice.name.includes('Eva') ||
+                voice.name.includes('Samantha')
+            );
+            if (femaleVoice) utterance.voice = femaleVoice;
+            
+            speechSynthesis.speak(utterance);
+        }
+
+        // Initialize speech recognition on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initSpeechRecognition();
+            
+            // Load voices for text-to-speech
+            if (speechSynthesis.onvoiceschanged !== undefined) {
+                speechSynthesis.onvoiceschanged = function() {
+                    // Voices loaded
+                };
+            }
+        });
+
+        // Mood Functions
+        function setMood(level) {
+            document.querySelectorAll('.mood-emoji').forEach(emoji => emoji.classList.remove('selected'));
+            document.querySelectorAll('.mood-emoji')[Math.floor((level-1)/2)].classList.add('selected');
+        }
+
+        // Calendar Connection
+        async function connectCalendar() {
+            try {
+                const response = await fetch(`${backendUrl}/api/calendar/connect-google?user_id=1`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.auth_url) {
+                    // Open Google OAuth in popup
+                    const popup = window.open(
+                        data.auth_url, 
+                        'google-calendar-auth', 
+                        'width=600,height=600,scrollbars=yes,resizable=yes'
+                    );
+                    
+                    // Listen for popup close
+                    const checkClosed = setInterval(() => {
+                        if (popup.closed) {
+                            clearInterval(checkClosed);
+                            // Check if connection was successful
+                            setTimeout(() => {
+                                checkCalendarConnection();
+                            }, 1000);
+                        }
+                    }, 1000);
+                } else {
+                    alert('❌ Error getting Google Calendar authorization URL');
+                }
+            } catch (error) {
+                console.error('Calendar connection error:', error);
+                alert('❌ Failed to connect to Aurora Life OS backend. Please make sure the backend server is running on port 8000.');
+            }
+        }
+        
+        async function checkCalendarConnection() {
+            try {
+                const response = await fetch(`${backendUrl}/api/calendar/connection-status?user_id=1`);
+                const data = await response.json();
+                
+                if (data.google_calendar_connected) {
+                    document.querySelector('.connect-button').innerHTML = '✅ Google Calendar Connected';
+                    document.querySelector('.connect-button').style.background = '#52C41A';
+                    alert('🎉 Google Calendar connected successfully!');
+                } else {
+                    alert('📝 Calendar connection pending. You may need to complete the authorization process.');
+                }
+            } catch (error) {
+                console.error('Status check error:', error);
+            }
+        }
+        
+        // Quick Rescheduling Functions
+        let calendarEvents = [];
+        let quickRescheduleVisible = false;
+
+        async function loadCalendarEvents() {
+            try {
+                const response = await fetch(`${backendUrl}/api/calendar/events?user_id=1&days_ahead=7`);
+                if (response.ok) {
+                    const events = await response.json();
+                    calendarEvents = events;
+                    renderCalendarEvents(events);
+                    populateRescheduleDropdown(events);
+                }
+            } catch (error) {
+                console.error('Error loading calendar events:', error);
+            }
+        }
+
+        function renderCalendarEvents(events) {
+            const container = document.getElementById('calendar-events-container');
+            if (!events || events.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: #8C8C8C;">
+                        <div style="font-size: 32px; margin-bottom: 8px;">📅</div>
+                        <p>No events scheduled for today</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const eventsHtml = events.filter(event => {
+                const eventDate = new Date(event.start_time);
+                const today = new Date();
+                return eventDate.toDateString() === today.toDateString();
+            }).map(event => {
+                const startTime = new Date(event.start_time);
+                const endTime = new Date(event.end_time);
+                const timeStr = `${startTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${endTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+                
+                return `
+                    <div class="calendar-event-item" data-event-id="${event.id}" style="display: flex; align-items: center; margin: 8px 0; padding: 8px; background: #F5F7FA; border-radius: 8px; cursor: pointer;" onclick="selectEventForReschedule('${event.id}', '${event.title}')">
+                        <div style="width: 4px; height: 24px; background: #4A90E2; margin-right: 12px;"></div>
+                        <div style="flex: 1;">
+                            <div style="font-size: 14px; font-weight: 500;">${event.title}</div>
+                            <div style="font-size: 12px; color: #8C8C8C;">${timeStr}</div>
+                        </div>
+                        <button onclick="quickRescheduleEvent(event, '${event.id}', '${event.title}'); event.stopPropagation();" style="background: #4A90E2; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 10px; margin-left: 8px;">Reschedule</button>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = eventsHtml || `
+                <div style="text-align: center; padding: 20px; color: #8C8C8C;">
+                    <p>No events scheduled for today</p>
+                </div>
+            `;
+        }
+
+        function populateRescheduleDropdown(events) {
+            const dropdown = document.getElementById('reschedule-event-select');
+            dropdown.innerHTML = '<option value="">Select an event to reschedule</option>';
+            
+            events.forEach(event => {
+                const startTime = new Date(event.start_time);
+                const timeStr = startTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const dateStr = startTime.toLocaleDateString();
+                dropdown.innerHTML += `<option value="${event.id}">${event.title} (${dateStr} ${timeStr})</option>`;
+            });
+        }
+
+        function toggleQuickReschedule() {
+            const panel = document.getElementById('quick-reschedule-panel');
+            const btn = document.getElementById('quickRescheduleBtn');
+            
+            quickRescheduleVisible = !quickRescheduleVisible;
+            panel.style.display = quickRescheduleVisible ? 'block' : 'none';
+            btn.textContent = quickRescheduleVisible ? 'Hide Reschedule' : 'Quick Reschedule';
+            btn.style.background = quickRescheduleVisible ? '#FF4D4F' : '#4A90E2';
+        }
+
+        function selectEventForReschedule(eventId, eventTitle) {
+            const dropdown = document.getElementById('reschedule-event-select');
+            dropdown.value = eventId;
+            
+            if (!quickRescheduleVisible) {
+                toggleQuickReschedule();
+            }
+        }
+
+        function quickRescheduleEvent(event, eventId, eventTitle) {
+            selectEventForReschedule(eventId, eventTitle);
+        }
+
+        function suggestReschedule(timeframe) {
+            const dateInput = document.getElementById('reschedule-date');
+            const timeInput = document.getElementById('reschedule-time');
+            const today = new Date();
+            
+            let newDate = new Date(today);
+            
+            switch(timeframe) {
+                case 'tomorrow':
+                    newDate.setDate(today.getDate() + 1);
+                    break;
+                case 'nextWeek':
+                    newDate.setDate(today.getDate() + 7);
+                    break;
+                case 'nextMonth':
+                    newDate.setMonth(today.getMonth() + 1);
+                    break;
+            }
+            
+            dateInput.value = newDate.toISOString().split('T')[0];
+            timeInput.value = '09:00'; // Default to 9 AM
+        }
+
+        async function executeReschedule() {
+            const eventId = document.getElementById('reschedule-event-select').value;
+            const newDate = document.getElementById('reschedule-date').value;
+            const newTime = document.getElementById('reschedule-time').value;
+            
+            if (!eventId || !newDate || !newTime) {
+                alert('Please select an event and specify the new date/time');
+                return;
+            }
+            
+            try {
+                const newDateTime = new Date(`${newDate}T${newTime}`);
+                const originalEvent = calendarEvents.find(e => e.id.toString() === eventId);
+                
+                if (!originalEvent) {
+                    alert('Event not found');
+                    return;
+                }
+                
+                // Calculate duration
+                const originalStart = new Date(originalEvent.start_time);
+                const originalEnd = new Date(originalEvent.end_time);
+                const duration = originalEnd - originalStart;
+                
+                const newEndDateTime = new Date(newDateTime.getTime() + duration);
+                
+                const response = await fetch(`${backendUrl}/api/calendar/events/${eventId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        start_time: newDateTime.toISOString(),
+                        end_time: newEndDateTime.toISOString(),
+                        user_id: 1
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('✅ Event rescheduled successfully!');
+                    toggleQuickReschedule();
+                    loadCalendarEvents(); // Refresh events
+                } else {
+                    alert('Failed to reschedule event. This feature requires Google Calendar write permissions.');
+                }
+            } catch (error) {
+                console.error('Error rescheduling event:', error);
+                alert('Error rescheduling event');
+            }
+        }
+
+        function cancelReschedule() {
+            document.getElementById('reschedule-event-select').value = '';
+            document.getElementById('reschedule-date').value = '';
+            document.getElementById('reschedule-time').value = '';
+            toggleQuickReschedule();
+        }
+
+        // Task Management Functions
+        let currentGoals = [];
+        let currentTasks = [];
+        let currentSuggestedTask = null;
+        let suggestionsPanelVisible = false;
+
+        // Smart Task Suggestions
+        async function loadTaskSuggestion() {
+            try {
+                const response = await fetch(`${backendUrl}/api/tasks/tasks/suggestions/next?user_id=1`);
+                if (response.ok) {
+                    const data = await response.json();
+                    currentSuggestedTask = data.suggestion;
+                    displayTaskSuggestion(data);
+                    showSuggestionsPanel();
+                } else {
+                    console.log('No suggestions available');
+                }
+            } catch (error) {
+                console.error('Error loading task suggestion:', error);
+            }
+        }
+
+        function displayTaskSuggestion(data) {
+            const suggestion = data.suggestion;
+            const content = document.getElementById('suggestion-content');
+            const actions = document.getElementById('suggestion-actions');
+            
+            if (!suggestion) {
+                content.innerHTML = `
+                    <div style="text-align: center; padding: 12px; color: rgba(255,255,255,0.8);">
+                        <p style="margin: 0; font-size: 13px;">🎉 All caught up! No pending tasks right now.</p>
+                    </div>
+                `;
+                actions.style.display = 'none';
+                return;
+            }
+            
+            content.innerHTML = `
+                <div style="margin-bottom: 8px;">
+                    <div style="font-weight: 500; font-size: 13px; margin-bottom: 4px;">${suggestion.title}</div>
+                    <div style="font-size: 11px; opacity: 0.9; margin-bottom: 6px;">From goal: ${suggestion.goal_title}</div>
+                    <div style="font-size: 11px; opacity: 0.8; line-height: 1.3;">${suggestion.description}</div>
+                    <div style="display: flex; gap: 12px; margin-top: 8px; font-size: 10px; opacity: 0.9;">
+                        <span>⏱️ ${suggestion.estimated_duration}</span>
+                        <span>🔥 ${suggestion.priority}</span>
+                    </div>
+                </div>
+            `;
+            
+            actions.style.display = 'flex';
+        }
+
+        function showSuggestionsPanel() {
+            const panel = document.getElementById('smart-suggestions-panel');
+            panel.style.display = 'block';
+            suggestionsPanelVisible = true;
+        }
+
+        function hideSuggestions() {
+            const panel = document.getElementById('smart-suggestions-panel');
+            panel.style.display = 'none';
+            suggestionsPanelVisible = false;
+        }
+
+        async function refreshTaskSuggestion() {
+            const content = document.getElementById('suggestion-content');
+            const actions = document.getElementById('suggestion-actions');
+            
+            // Show loading
+            content.innerHTML = `
+                <div style="display: flex; justify-content: center; padding: 12px;">
+                    <div style="width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid white; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                </div>
+            `;
+            actions.style.display = 'none';
+            
+            await loadTaskSuggestion();
+        }
+
+        async function startSuggestedTask() {
+            if (!currentSuggestedTask) return;
+            
+            try {
+                const response = await fetch(`${backendUrl}/api/tasks/tasks/${currentSuggestedTask.task_id}/start`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if (response.ok) {
+                    // Show success message
+                    sendMessage(`Started task: ${currentSuggestedTask.title}`);
+                    hideSuggestions();
+                    
+                    // Load new suggestion after a delay
+                    setTimeout(() => {
+                        loadTaskSuggestion();
+                    }, 3000);
+                } else {
+                    alert('Failed to start task. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error starting task:', error);
+                alert('Error starting task');
+            }
+        }
+
+        function skipSuggestion() {
+            // Load a new suggestion
+            refreshTaskSuggestion();
+        }
+
+        // Goal Coaching Helper Functions
+        async function createSuggestedTasks(tasks) {
+            try {
+                const response = await fetch(`${backendUrl}/api/coaching/create-tasks`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        tasks: tasks,
+                        user_id: 1,
+                        goal_id: null  // Could link to current goal being discussed
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    sendMessage(`✅ Created ${result.tasks.length} tasks! Check your Goals tab to see them.`);
+                    
+                    // Refresh task suggestions
+                    setTimeout(() => {
+                        loadTaskSuggestion();
+                    }, 2000);
+                } else {
+                    alert('Failed to create tasks. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error creating tasks:', error);
+                alert('Error creating tasks');
+            }
+        }
+
+        async function createSuggestedGoal(title, category) {
+            try {
+                const response = await fetch(`${backendUrl}/api/goals/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: title.length > 50 ? title.substring(0, 50) : title,
+                        description: `Goal created through coaching conversation`,
+                        category: category || 'personal',
+                        target_date: null  // User can set this later
+                    })
+                });
+                
+                if (response.ok) {
+                    const goal = await response.json();
+                    sendMessage(`🎯 Goal created: "${goal.title}". You can now track your progress in the Goals tab!`);
+                    
+                    // Refresh goals if user is on goals tab
+                    setTimeout(() => {
+                        loadGoals();
+                    }, 1000);
+                } else {
+                    alert('Failed to create goal. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error creating goal:', error);
+                alert('Error creating goal');
+            }
+        }
+        
+        async function loadGoals() {
+            try {
+                const response = await fetch(`${backendUrl}/api/goals/user/1`);
+                const goals = await response.json();
+                currentGoals = goals;
+                renderGoals(goals);
+                
+                // Load next task suggestion
+                loadNextTaskSuggestion();
+            } catch (error) {
+                console.error('Error loading goals:', error);
+            }
+        }
+        
+        function renderGoals(goals) {
+            const goalsList = document.getElementById('goals-list');
+            
+            if (goals.length === 0) {
+                goalsList.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #8C8C8C;">
+                        <div style="font-size: 48px; margin-bottom: 16px;">🎯</div>
+                        <h3 style="margin-bottom: 8px; color: #262626;">No goals yet</h3>
+                        <p>Start by adding your first goal to begin your journey!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const goalsHtml = goals.map(goal => {
+                const statusColor = getGoalStatusColor(goal.status);
+                const daysLeft = goal.target_date ? getDaysUntilTarget(goal.target_date) : null;
+                
+                return `
+                    <div class="goal-card" data-goal-id="${goal.id}">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <h3>${goal.title}</h3>
+                            <span style="font-size: 12px; background: ${statusColor.bg}; color: ${statusColor.text}; padding: 4px 8px; border-radius: 12px;">${goal.status}</span>
+                        </div>
+                        <div class="goal-progress">
+                            <div class="goal-progress-fill" style="width: ${goal.progress}%;"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                            <p style="font-size: 12px; color: #8C8C8C;">
+                                ${goal.progress}% Complete${daysLeft ? ` • ${daysLeft}` : ''}
+                            </p>
+                            <div style="display: flex; gap: 8px;">
+                                <button onclick="breakdownGoalIntoTasks(${goal.id})" style="background: #4A90E2; color: white; border: none; border-radius: 6px; padding: 4px 8px; font-size: 10px; cursor: pointer;">📋 Tasks</button>
+                                <button onclick="editGoal(${goal.id})" style="background: #FFF7E6; color: #FAAD14; border: none; border-radius: 6px; padding: 4px 8px; font-size: 10px; cursor: pointer;">✏️</button>
+                                <button onclick="deleteGoal(${goal.id})" style="background: #FFF2F0; color: #FF4D4F; border: none; border-radius: 6px; padding: 4px 8px; font-size: 10px; cursor: pointer;">🗑️</button>
+                            </div>
+                        </div>
+                        ${goal.description ? `<p style="font-size: 12px; color: #8C8C8C; margin-top: 8px; line-height: 1.3;">${goal.description}</p>` : ''}
+                    </div>
+                `;
+            }).join('');
+            
+            goalsList.innerHTML = goalsHtml;
+        }
+        
+        function getGoalStatusColor(status) {
+            const colors = {
+                'active': { bg: '#E8F5E8', text: '#52C41A' },
+                'completed': { bg: '#F6FFED', text: '#52C41A' },
+                'paused': { bg: '#FFF7E6', text: '#FAAD14' },
+                'cancelled': { bg: '#FFF2F0', text: '#FF4D4F' }
+            };
+            return colors[status] || colors.active;
+        }
+        
+        function getDaysUntilTarget(targetDate) {
+            const today = new Date();
+            const target = new Date(targetDate);
+            const timeDiff = target.getTime() - today.getTime();
+            const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+            
+            if (daysDiff > 0) {
+                return `${daysDiff} days left`;
+            } else if (daysDiff === 0) {
+                return 'Due today';
+            } else {
+                return `${Math.abs(daysDiff)} days overdue`;
+            }
+        }
+        
+        async function breakdownGoalIntoTasks(goalId) {
+            const goal = currentGoals.find(g => g.id === goalId);
+            if (!goal) return;
+            
+            // Show modal
+            document.getElementById('task-breakdown-modal').style.display = 'flex';
+            document.getElementById('breakdown-goal-title').textContent = `Tasks for: ${goal.title}`;
+            document.getElementById('task-breakdown-loading').style.display = 'block';
+            document.getElementById('task-breakdown-content').innerHTML = '';
+            
+            try {
+                const response = await fetch(`${backendUrl}/api/tasks/goals/${goalId}/breakdown`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        goal_id: goalId,
+                        max_tasks: 8,
+                        auto_schedule: true,
+                        consider_user_context: true
+                    })
+                });
+                
+                const result = await response.json();
+                
+                // Hide loading
+                document.getElementById('task-breakdown-loading').style.display = 'none';
+                
+                if (result.tasks && result.tasks.length > 0) {
+                    renderTaskBreakdown(result.tasks);
+                } else {
+                    document.getElementById('task-breakdown-content').innerHTML = `
+                        <div style="text-align: center; padding: 20px; color: #8C8C8C;">
+                            <p>No tasks could be generated for this goal.</p>
+                        </div>
+                    `;
+                }
+                
+                // Refresh goals to show updated progress
+                setTimeout(() => loadGoals(), 1000);
+                
+            } catch (error) {
+                document.getElementById('task-breakdown-loading').style.display = 'none';
+                document.getElementById('task-breakdown-content').innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: #FF4D4F;">
+                        <p>❌ Error generating tasks. Please try again.</p>
+                    </div>
+                `;
+                console.error('Error breaking down goal:', error);
+            }
+        }
+        
+        function renderTaskBreakdown(tasks) {
+            const tasksHtml = tasks.map((task, index) => {
+                const priorityColor = getPriorityColor(task.priority);
+                const energyEmoji = getEnergyEmoji(task.energy_level_required);
+                
+                return `
+                    <div class="task-card" style="background: #F8F9FA; border: 1px solid #E8E8E8; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                            <h4 style="font-size: 14px; color: #262626; margin: 0; flex: 1;">${index + 1}. ${task.title}</h4>
+                            <span style="background: ${priorityColor.bg}; color: ${priorityColor.text}; padding: 2px 6px; border-radius: 10px; font-size: 10px; white-space: nowrap; margin-left: 8px;">${task.priority.toUpperCase()}</span>
+                        </div>
+                        <p style="font-size: 12px; color: #595959; margin: 0 0 8px 0; line-height: 1.4;">${task.description}</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; gap: 12px; font-size: 11px; color: #8C8C8C;">
+                                <span>⏱️ ${task.time_estimate_display}</span>
+                                <span>${energyEmoji} Energy ${task.energy_level_required}/10</span>
+                                <span>🕒 ${capitalizeFirst(task.preferred_time_of_day || 'anytime')}</span>
+                            </div>
+                            <button onclick="startTask(${task.id})" style="background: #52C41A; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 10px; cursor: pointer;">Start</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('task-breakdown-content').innerHTML = `
+                <div style="margin-bottom: 16px;">
+                    <p style="font-size: 14px; color: #595959;">AI has broken down your goal into ${tasks.length} actionable tasks:</p>
+                </div>
+                ${tasksHtml}
+                <div style="text-align: center; margin-top: 16px;">
+                    <button onclick="closeTaskBreakdown()" style="background: #4A90E2; color: white; border: none; border-radius: 8px; padding: 10px 20px; cursor: pointer;">Got it!</button>
+                </div>
+            `;
+        }
+        
+        function getPriorityColor(priority) {
+            const colors = {
+                'low': { bg: '#F6FFED', text: '#52C41A' },
+                'medium': { bg: '#FFF7E6', text: '#FAAD14' },
+                'high': { bg: '#FFF2F0', text: '#FF4D4F' },
+                'urgent': { bg: '#FF4D4F', text: 'white' }
+            };
+            return colors[priority] || colors.medium;
+        }
+        
+        function getEnergyEmoji(energy) {
+            if (energy <= 3) return '🔋';
+            if (energy <= 6) return '⚡';
+            return '🚀';
+        }
+        
+        function capitalizeFirst(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+        
+        function closeTaskBreakdown() {
+            document.getElementById('task-breakdown-modal').style.display = 'none';
+        }
+        
+        async function startTask(taskId) {
+            try {
+                const response = await fetch(`${backendUrl}/api/tasks/tasks/${taskId}/start`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    alert('✅ Task started! Track your progress in the chat.');
+                    closeTaskBreakdown();
+                    loadNextTaskSuggestion(); // Refresh suggestion
+                } else {
+                    alert('❌ Failed to start task. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error starting task:', error);
+                alert('❌ Error starting task. Please try again.');
+            }
+        }
+        
+        async function loadNextTaskSuggestion() {
+            try {
+                const response = await fetch(`${backendUrl}/api/tasks/tasks/suggestions/next`);
+                const data = await response.json();
+                
+                if (data.suggestion) {
+                    currentSuggestedTask = data.suggestion;
+                    showNextTaskSuggestion(data.suggestion);
+                } else {
+                    hideNextTaskSuggestion();
+                }
+            } catch (error) {
+                console.error('Error loading task suggestion:', error);
+                hideNextTaskSuggestion();
+            }
+        }
+        
+        function showNextTaskSuggestion(suggestion) {
+            const suggestionDiv = document.getElementById('next-task-suggestion');
+            const contentDiv = document.getElementById('suggested-task-content');
+            
+            contentDiv.innerHTML = `
+                <h4 style="margin: 0 0 4px 0; font-size: 14px;">${suggestion.title}</h4>
+                <p style="margin: 0 0 8px 0; font-size: 12px; opacity: 0.9;">${suggestion.reason}</p>
+                <div style="font-size: 11px; opacity: 0.8;">
+                    ⏱️ ${suggestion.estimated_duration} • 
+                    📊 ${suggestion.priority} priority
+                    ${suggestion.goal_title ? ` • 🎯 ${suggestion.goal_title}` : ''}
+                </div>
+            `;
+            
+            suggestionDiv.style.display = 'block';
+        }
+        
+        function hideNextTaskSuggestion() {
+            document.getElementById('next-task-suggestion').style.display = 'none';
+        }
+        
+        // Goal CRUD Functions
+        function showAddGoalForm() {
+            document.getElementById('add-goal-form').style.display = 'block';
+            document.getElementById('add-goal-btn').style.display = 'none';
+            
+            // Set default date to 3 months from now
+            const defaultDate = new Date();
+            defaultDate.setMonth(defaultDate.getMonth() + 3);
+            document.getElementById('goal-target-date-input').value = defaultDate.toISOString().split('T')[0];
+        }
+        
+        function cancelAddGoal() {
+            document.getElementById('add-goal-form').style.display = 'none';
+            document.getElementById('add-goal-btn').style.display = 'block';
+            clearGoalForm();
+        }
+        
+        function clearGoalForm() {
+            document.getElementById('goal-title-input').value = '';
+            document.getElementById('goal-description-input').value = '';
+            document.getElementById('goal-category-input').value = 'personal';
+            document.getElementById('goal-target-date-input').value = '';
+        }
+        
+        async function saveNewGoal() {
+            const title = document.getElementById('goal-title-input').value.trim();
+            const description = document.getElementById('goal-description-input').value.trim();
+            const category = document.getElementById('goal-category-input').value;
+            const targetDate = document.getElementById('goal-target-date-input').value;
+            
+            if (!title) {
+                alert('Please enter a goal title');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${backendUrl}/api/goals/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title,
+                        description: description || null,
+                        category,
+                        target_date: targetDate || null,
+                        user_id: 1
+                    })
+                });
+                
+                if (response.ok) {
+                    cancelAddGoal();
+                    loadGoals(); // Refresh goals list
+                    alert('🎉 Goal added successfully!');
+                } else {
+                    alert('❌ Failed to add goal. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error saving goal:', error);
+                alert('❌ Error saving goal. Please try again.');
+            }
+        }
+        
+        async function deleteGoal(goalId) {
+            if (!confirm('Are you sure you want to delete this goal?')) return;
+            
+            try {
+                const response = await fetch(`${backendUrl}/api/goals/${goalId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    loadGoals(); // Refresh goals list
+                    alert('✅ Goal deleted successfully');
+                } else {
+                    alert('❌ Failed to delete goal');
+                }
+            } catch (error) {
+                console.error('Error deleting goal:', error);
+                alert('❌ Error deleting goal');
+            }
+        }
+        
+        async function editGoal(goalId) {
+            // For now, just show a simple prompt - in a full implementation,
+            // we'd want a proper edit form
+            const newProgress = prompt('Enter new progress percentage (0-100):');
+            
+            if (newProgress === null) return;
+            
+            const progress = parseInt(newProgress);
+            if (isNaN(progress) || progress < 0 || progress > 100) {
+                alert('Please enter a valid percentage between 0 and 100');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${backendUrl}/api/goals/${goalId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ progress })
+                });
+                
+                if (response.ok) {
+                    loadGoals(); // Refresh goals list
+                    alert('✅ Goal updated successfully!');
+                } else {
+                    alert('❌ Failed to update goal');
+                }
+            } catch (error) {
+                console.error('Error updating goal:', error);
+                alert('❌ Error updating goal');
+            }
+        }
+        
+        // Add CSS for spinning animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Load goals when Goals tab is clicked
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-focus chat input
+            document.getElementById('messageInput').focus();
+            
+            // Override nav click handlers to load goals, calendar, and suggestions
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    if (this.dataset.tab === 'goals') {
+                        setTimeout(() => loadGoals(), 100);
+                    } else if (this.dataset.tab === 'calendar') {
+                        setTimeout(() => loadCalendarEvents(), 100);
+                    } else if (this.dataset.tab === 'chat') {
+                        setTimeout(() => {
+                            if (!suggestionsPanelVisible) {
+                                loadTaskSuggestion();
+                            }
+                        }, 500);
+                    }
+                });
+            });
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-focus chat input
+            document.getElementById('messageInput').focus();
+            
+            // Load initial task suggestion after a short delay
+            setTimeout(() => {
+                loadTaskSuggestion();
+            }, 1500);
+            
+            // Load mood analytics when mood tab is shown
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    if (this.dataset.tab === 'mood') {
+                        setTimeout(() => loadMoodAnalytics(), 100);
+                    }
+                });
+            });
+        });
+
+        // Mood Visualization Functions
+        let moodChart = null;
+        let energyChart = null;
+
+        async function loadMoodAnalytics() {
+            try {
+                const response = await fetch(`${backendUrl}/api/analytics/mood/history/1?days=30`);
+                if (!response.ok) return;
+                
+                const data = await response.json();
+                
+                // Create mood trend chart
+                createMoodTrendChart(data.daily_average);
+                
+                // Create energy pattern chart
+                createEnergyPatternChart(data.energy_patterns);
+                
+                // Display insights
+                displayMoodInsights(data.recommendations);
+                
+            } catch (error) {
+                console.error('Error loading mood analytics:', error);
+            }
+        }
+
+        function createMoodTrendChart(dailyData) {
+            const ctx = document.getElementById('moodChart').getContext('2d');
+            
+            // Destroy existing chart if any
+            if (moodChart) {
+                moodChart.destroy();
+            }
+            
+            // Prepare data
+            const labels = dailyData.map(d => {
+                const date = new Date(d.date);
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            });
+            
+            const moodData = dailyData.map(d => d.mood);
+            const energyData = dailyData.map(d => d.energy);
+            
+            moodChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Mood',
+                            data: moodData,
+                            borderColor: '#FF4D4F',
+                            backgroundColor: 'rgba(255, 77, 79, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Energy',
+                            data: energyData,
+                            borderColor: '#52C41A',
+                            backgroundColor: 'rgba(82, 196, 26, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 10,
+                            ticks: {
+                                stepSize: 2
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createEnergyPatternChart(energyPatterns) {
+            const ctx = document.getElementById('energyChart').getContext('2d');
+            
+            // Destroy existing chart if any
+            if (energyChart) {
+                energyChart.destroy();
+            }
+            
+            const labels = Object.keys(energyPatterns);
+            const data = Object.values(energyPatterns);
+            
+            energyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels.map(l => l.charAt(0).toUpperCase() + l.slice(1)),
+                    datasets: [{
+                        label: 'Average Energy Level',
+                        data: data,
+                        backgroundColor: [
+                            'rgba(255, 159, 64, 0.8)',
+                            'rgba(255, 206, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(153, 102, 255, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 159, 64, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 10,
+                            ticks: {
+                                stepSize: 2
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function displayMoodInsights(recommendations) {
+            const insightsContainer = document.getElementById('moodInsights');
+            
+            if (!recommendations || recommendations.length === 0) {
+                insightsContainer.innerHTML = '<p>No insights available yet. Keep tracking your mood!</p>';
+                return;
+            }
+            
+            let html = '';
+            recommendations.forEach(rec => {
+                html += `
+                    <div style="margin-bottom: 8px; padding: 8px; background: white; border-radius: 6px; border-left: 3px solid #4A90E2;">
+                        <p style="margin: 0; font-size: 14px; color: #262626;">${rec}</p>
+                    </div>
+                `;
+            });
+            
+            insightsContainer.innerHTML = html;
+        }
+
+        // Update mood save function to reload analytics
+        async function saveMoodCheckin() {
+            const moodLevel = document.querySelector('.mood-slider').value;
+            const energyLevel = document.querySelectorAll('.mood-slider')[1].value;
+            const notes = document.querySelector('textarea').value;
+            
+            try {
+                const response = await fetch(`${backendUrl}/api/mood/entry`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id: 1,
+                        mood_level: parseInt(moodLevel),
+                        energy_level: parseInt(energyLevel),
+                        notes: notes,
+                        stress_level: 5 // Default for now
+                    })
+                });
+                
+                if (response.ok) {
+                    // Show success message
+                    alert('Mood check-in saved successfully!');
+                    
+                    // Clear form
+                    document.querySelector('textarea').value = '';
+                    
+                    // Reload analytics
+                    loadMoodAnalytics();
+                }
+            } catch (error) {
+                console.error('Error saving mood:', error);
+                alert('Failed to save mood check-in');
+            }
+        }
+
+        // Add click handler to save button
+        document.addEventListener('DOMContentLoaded', function() {
+            const saveButton = document.querySelector('button[style*="background: #FF4D4F"]');
+            if (saveButton) {
+                saveButton.onclick = saveMoodCheckin;
+            }
+        });
+
+        // Autonomous Scheduling Functions
+        async function generateSchedule() {
+            const scheduleResults = document.getElementById('schedule-results');
+            const scheduleLoading = document.getElementById('schedule-loading');
+            const scheduleSuggestions = document.getElementById('schedule-suggestions');
+            
+            // Show loading state
+            scheduleSuggestions.style.display = 'block';
+            scheduleLoading.style.display = 'block';
+            scheduleResults.innerHTML = '';
+            
+            try {
+                const response = await fetch(`${backendUrl}/api/autonomous/schedule/suggest`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id: 1,
+                        days_ahead: 7,
+                        include_insights: true
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to generate schedule');
+                }
+                
+                const data = await response.json();
+                
+                // Hide loading
+                scheduleLoading.style.display = 'none';
+                
+                // Display results
+                displayScheduleSuggestions(data);
+                
+            } catch (error) {
+                console.error('Error generating schedule:', error);
+                scheduleLoading.style.display = 'none';
+                scheduleResults.innerHTML = `
+                    <div style="padding: 12px; background: #FFF1F0; border-radius: 6px; border-left: 3px solid #FF4D4F;">
+                        <p style="margin: 0; font-size: 14px; color: #A8071A;">Failed to generate schedule. Please try again.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayScheduleSuggestions(data) {
+            const scheduleResults = document.getElementById('schedule-results');
+            
+            if (!data.scheduled_tasks || data.scheduled_tasks.length === 0) {
+                scheduleResults.innerHTML = `
+                    <div style="padding: 12px; background: #F6FFED; border-radius: 6px; border-left: 3px solid #52C41A;">
+                        <p style="margin: 0; font-size: 14px; color: #135200;">No tasks to schedule right now. Great job staying on top of things!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = `
+                <div style="margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <h4 style="margin: 0; font-size: 14px; color: #262626;">📅 Suggested Schedule (${data.scheduled_count} tasks)</h4>
+                        <button onclick="approveAllSchedules(${JSON.stringify(data.scheduled_tasks).replace(/"/g, '&quot;')})" 
+                                style="background: #52C41A; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 11px; cursor: pointer;">
+                            Approve All
+                        </button>
+                    </div>
+            `;
+            
+            // Group tasks by day
+            const tasksByDay = {};
+            data.scheduled_tasks.forEach(task => {
+                const date = new Date(task.scheduled_time);
+                const dateKey = date.toDateString();
+                if (!tasksByDay[dateKey]) {
+                    tasksByDay[dateKey] = [];
+                }
+                tasksByDay[dateKey].push(task);
+            });
+            
+            // Display tasks by day
+            Object.keys(tasksByDay).forEach(dateKey => {
+                const date = new Date(dateKey);
+                const dayName = date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+                
+                html += `
+                    <div style="margin-bottom: 12px; padding: 10px; background: #F8F9FA; border-radius: 6px;">
+                        <h5 style="margin: 0 0 8px 0; font-size: 12px; color: #4A90E2; font-weight: 600;">${dayName}</h5>
+                `;
+                
+                tasksByDay[dateKey].forEach(task => {
+                    const time = new Date(task.scheduled_time).toLocaleTimeString('en-US', { 
+                        hour: 'numeric', 
+                        minute: '2-digit', 
+                        hour12: true 
+                    });
+                    
+                    const confidenceColor = task.confidence >= 0.8 ? '#52C41A' : task.confidence >= 0.6 ? '#FAAD14' : '#FF4D4F';
+                    
+                    html += `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; background: white; border-radius: 4px; margin-bottom: 4px; border-left: 3px solid ${getPriorityColor(task.task_priority)};">
+                            <div style="flex: 1;">
+                                <div style="font-size: 13px; font-weight: 500; color: #262626;">${task.task_title}</div>
+                                <div style="font-size: 11px; color: #8C8C8C;">${time} • ${task.duration_minutes}min • ${task.reasoning}</div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 4px;">
+                                <div style="width: 8px; height: 8px; border-radius: 50%; background: ${confidenceColor};" title="Confidence: ${Math.round(task.confidence * 100)}%"></div>
+                                <button onclick="approveSchedule(${task.task_id}, '${task.scheduled_time}')" 
+                                        style="background: #4A90E2; color: white; border: none; border-radius: 3px; padding: 2px 6px; font-size: 10px; cursor: pointer;">
+                                    ✓
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+            });
+            
+            // Add insights if available
+            if (data.insights && data.insights.length > 0) {
+                html += `
+                    <div style="margin-top: 12px; padding: 10px; background: #E6F7FF; border-radius: 6px; border-left: 3px solid #1890FF;">
+                        <h5 style="margin: 0 0 6px 0; font-size: 12px; color: #1890FF;">💡 Insights</h5>
+                `;
+                data.insights.forEach(insight => {
+                    html += `<p style="margin: 2px 0; font-size: 11px; color: #003A8C;">${insight}</p>`;
+                });
+                html += '</div>';
+            }
+            
+            // Add unscheduled tasks if any
+            if (data.unscheduled_tasks && data.unscheduled_tasks.length > 0) {
+                html += `
+                    <div style="margin-top: 12px; padding: 10px; background: #FFF7E6; border-radius: 6px; border-left: 3px solid #FAAD14;">
+                        <h5 style="margin: 0 0 6px 0; font-size: 12px; color: #D48806;">⚠️ Couldn't Schedule (${data.unscheduled_tasks.length})</h5>
+                `;
+                data.unscheduled_tasks.forEach(task => {
+                    html += `<p style="margin: 2px 0; font-size: 11px; color: #AD6800;">${task.title} - ${task.reason}</p>`;
+                });
+                html += '</div>';
+            }
+            
+            html += '</div>';
+            scheduleResults.innerHTML = html;
+        }
+
+        function getPriorityColor(priority) {
+            switch (priority) {
+                case 'urgent': return '#FF4D4F';
+                case 'high': return '#FAAD14';
+                case 'medium': return '#4A90E2';
+                case 'low': return '#52C41A';
+                default: return '#8C8C8C';
+            }
+        }
+
+        async function approveSchedule(taskId, scheduledTime) {
+            try {
+                const response = await fetch(`${backendUrl}/api/autonomous/schedule/approve`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        task_id: taskId,
+                        scheduled_time: scheduledTime,
+                        user_id: 1
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    // Show success message
+                    const button = event.target;
+                    button.textContent = '✓';
+                    button.style.background = '#52C41A';
+                    button.disabled = true;
+                    
+                    // Optional: Show toast notification
+                    showToast(result.message, 'success');
+                } else {
+                    showToast('Failed to schedule task', 'error');
+                }
+            } catch (error) {
+                console.error('Error approving schedule:', error);
+                showToast('Failed to schedule task', 'error');
+            }
+        }
+
+        async function approveAllSchedules(scheduledTasks) {
+            try {
+                const taskSchedules = scheduledTasks.map(task => ({
+                    task_id: task.task_id,
+                    scheduled_time: task.scheduled_time
+                }));
+                
+                const response = await fetch(`${backendUrl}/api/autonomous/schedule/batch-approve`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(taskSchedules)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    showToast(`Successfully scheduled ${result.approved_count} tasks`, 'success');
+                    
+                    // Update UI to show all approved
+                    document.querySelectorAll('#schedule-results button[onclick*="approveSchedule"]').forEach(btn => {
+                        btn.textContent = '✓';
+                        btn.style.background = '#52C41A';
+                        btn.disabled = true;
+                    });
+                    
+                    // Hide the "Approve All" button
+                    document.querySelector('button[onclick*="approveAllSchedules"]').style.display = 'none';
+                    
+                } else {
+                    showToast('Failed to approve all schedules', 'error');
+                }
+            } catch (error) {
+                console.error('Error approving all schedules:', error);
+                showToast('Failed to approve all schedules', 'error');
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            // Simple toast notification
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 16px;
+                border-radius: 6px;
+                color: white;
+                font-size: 14px;
+                z-index: 10000;
+                max-width: 300px;
+                background: ${type === 'success' ? '#52C41A' : type === 'error' ? '#FF4D4F' : '#4A90E2'};
+            `;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 3000);
+        }
+        
+        // Connection Status Monitor
+        let connectionStatus = 'connected';
+        let connectionCheckInterval;
+        
+        function updateConnectionStatus(isConnected) {
+            const statusEl = document.getElementById('connection-status');
+            const statusDot = document.getElementById('status-dot');
+            const statusText = document.getElementById('status-text');
+            
+            if (isConnected) {
+                connectionStatus = 'connected';
+                statusEl.style.background = '#52c41a';
+                statusText.textContent = 'Connected';
+                statusDot.style.animation = 'none';
+            } else {
+                connectionStatus = 'disconnected';
+                statusEl.style.background = '#ff4444';
+                statusText.textContent = 'Disconnected';
+                statusDot.style.animation = 'pulse 1s infinite';
+            }
+        }
+        
+        async function checkConnection() {
+            try {
+                const response = await fetch(`${backendUrl}/health`, { 
+                    method: 'GET',
+                    signal: AbortSignal.timeout(5000)
+                });
+                updateConnectionStatus(response.ok);
+            } catch (error) {
+                updateConnectionStatus(false);
+            }
+        }
+        
+        // Check connection every 30 seconds
+        connectionCheckInterval = setInterval(checkConnection, 30000);
+        
+        // Add pulse animation for disconnected state
+        const pulseStyle = document.createElement('style');
+        pulseStyle.textContent = `
+            @keyframes pulse {
+                0% { opacity: 1; }
+                50% { opacity: 0.5; }
+                100% { opacity: 1; }
+            }
+        `;
+        document.head.appendChild(pulseStyle);
+        
+        // Initialize connection check on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            checkConnection();
+            
+            // Re-check connection when coming back online
+            window.addEventListener('online', () => {
+                checkConnection();
+                showNotification('Connection restored', 'success');
+            });
+            
+            window.addEventListener('offline', () => {
+                updateConnectionStatus(false);
+                showNotification('Connection lost', 'error');
+            });
+        });
+
+        // =================
+        // AI CALENDAR SYSTEM
+        // =================
+        
+        let selectedEventType = 'task';
+        let currentWeekStart = null;
+        
+        // Smart Event Creation
+        function setEventType(type) {
+            selectedEventType = type;
+            document.querySelectorAll('.event-type-btn').forEach(btn => {
+                btn.style.background = btn.dataset.type === type ? 
+                    (type === 'goal_work' ? '#1890FF' : 
+                     type === 'deep_work' ? '#52C41A' : 
+                     type === 'meeting' ? '#FA8C16' : '#722ED1') : 
+                    (btn.dataset.type === 'goal_work' ? '#F0F9FF' :
+                     btn.dataset.type === 'deep_work' ? '#F6FFED' :
+                     btn.dataset.type === 'meeting' ? '#FFF7E6' : '#F9F0FF');
+                btn.style.color = btn.dataset.type === type ? 'white' : 
+                    (btn.dataset.type === 'goal_work' ? '#1890FF' :
+                     btn.dataset.type === 'deep_work' ? '#52C41A' :
+                     btn.dataset.type === 'meeting' ? '#FA8C16' : '#722ED1');
+            });
+        }
+        
+        async function createSmartEvent() {
+            const titleInput = document.getElementById('smart-event-title');
+            const durationSelect = document.getElementById('smart-event-duration');
+            
+            const title = titleInput.value.trim();
+            if (!title) {
+                showToast('Please enter an event title', 'error');
+                return;
+            }
+            
+            const duration = parseInt(durationSelect.value);
+            
+            try {
+                const response = await apiCall(`${backendUrl}/api/ai-calendar/smart-create`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        duration_minutes: duration,
+                        event_type: selectedEventType,
+                        priority: 'medium'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    titleInput.value = '';
+                    showToast(`✅ Event scheduled for ${new Date(result.scheduled_time).toLocaleString()}`, 'success');
+                    
+                    // Show AI insights if available
+                    if (result.ai_insights && result.ai_insights.reasoning) {
+                        setTimeout(() => {
+                            showToast(`🤖 ${result.ai_insights.reasoning}`, 'info');
+                        }, 2000);
+                    }
+                    
+                    // Refresh calendar events
+                    loadCalendarEvents();
+                } else {
+                    showToast(`❌ ${result.error || 'Failed to create event'}`, 'error');
+                    
+                    // Show alternatives if available
+                    if (result.alternatives && result.alternatives.length > 0) {
+                        setTimeout(() => {
+                            showAlternativeTimes(result.alternatives);
+                        }, 1000);
+                    }
+                }
+            } catch (error) {
+                console.error('Create smart event error:', error);
+                showToast('❌ Failed to create smart event', 'error');
+            }
+        }
+        
+        function showAlternativeTimes(alternatives) {
+            let message = '🔄 Alternative times available:\n';
+            alternatives.forEach((alt, index) => {
+                message += `${index + 1}. ${alt.time} - ${alt.reason}\n`;
+            });
+            alert(message);
+        }
+        
+        // Hourly Schedule Generation
+        async function generateHourlySchedule() {
+            const today = new Date().toISOString().split('T')[0];
+            const scheduleSection = document.getElementById('ai-schedule-today');
+            const contentDiv = document.getElementById('hourly-schedule-content');
+            
+            scheduleSection.style.display = 'block';
+            contentDiv.innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <div style="display: inline-block; width: 24px; height: 24px; border: 2px solid #f3f3f3; border-top: 2px solid #4A90E2; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                    <p style="margin-top: 8px; font-size: 12px; color: #8C8C8C;">Generating your perfect day...</p>
+                </div>
+            `;
+            
+            try {
+                const response = await apiCall(`${backendUrl}/api/ai-calendar/hourly-schedule`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        date: today
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayHourlySchedule(result);
+                    showToast(`📅 Today's schedule optimized! ${result.productivity_score}% productivity score`, 'success');
+                } else {
+                    contentDiv.innerHTML = '<p style="color: #FF4D4F; text-align: center;">Failed to generate schedule</p>';
+                    showToast('❌ Failed to generate hourly schedule', 'error');
+                }
+            } catch (error) {
+                console.error('Generate hourly schedule error:', error);
+                contentDiv.innerHTML = '<p style="color: #FF4D4F; text-align: center;">Error generating schedule</p>';
+                showToast('❌ Error generating schedule', 'error');
+            }
+        }
+        
+        function displayHourlySchedule(data) {
+            const contentDiv = document.getElementById('hourly-schedule-content');
+            
+            let html = `
+                <div style="margin-bottom: 16px; padding: 12px; background: #F0F9FF; border-radius: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h5 style="margin: 0; font-size: 12px; color: #1890FF;">Today's Optimization</h5>
+                        <div style="font-size: 10px; color: #8C8C8C;">
+                            ${data.ai_generated_slots} AI slots | ${data.productivity_score}% productive
+                        </div>
+                    </div>
+                </div>
+                <div style="display: grid; gap: 4px;">
+            `;
+            
+            data.hourly_schedule.forEach(slot => {
+                const isAI = slot.ai_generated;
+                const isGoal = slot.goal_related;
+                
+                html += `
+                    <div style="display: flex; align-items: center; padding: 6px 8px; background: ${isAI ? '#F6FFED' : '#FAFAFA'}; border-radius: 6px; border-left: 3px solid ${isGoal ? '#52C41A' : isAI ? '#4A90E2' : '#D9D9D9'};">
+                        <div style="min-width: 50px; font-size: 11px; font-weight: 600; color: #262626;">${slot.hour}</div>
+                        <div style="flex: 1;">
+                            <div style="font-size: 12px; font-weight: 500; color: #262626;">${slot.title}</div>
+                            ${slot.description ? `<div style="font-size: 10px; color: #8C8C8C; margin-top: 2px;">${slot.description}</div>` : ''}
+                        </div>
+                        <div style="font-size: 9px; color: #8C8C8C;">
+                            ${isAI ? '🤖' : '📅'} ${isGoal ? '🎯' : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            contentDiv.innerHTML = html;
+        }
+        
+        // Weekly Optimization
+        async function optimizeWeek() {
+            // Get Monday of current week
+            const today = new Date();
+            const monday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay() + 1);
+            const weekStart = monday.toISOString().split('T')[0];
+            currentWeekStart = weekStart;
+            
+            const optimizationSection = document.getElementById('weekly-optimization');
+            const contentDiv = document.getElementById('optimization-content');
+            
+            optimizationSection.style.display = 'block';
+            contentDiv.innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <div style="display: inline-block; width: 24px; height: 24px; border: 2px solid #f3f3f3; border-top: 2px solid #722ED1; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                    <p style="margin-top: 8px; font-size: 12px; color: #8C8C8C;">Analyzing your week...</p>
+                </div>
+            `;
+            
+            try {
+                const response = await apiCall(`${backendUrl}/api/ai-calendar/weekly-optimize`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        week_start_date: weekStart
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayWeeklyOptimization(result);
+                    showToast(`📊 Week optimized! ${result.current_analysis.goal_percentage.toFixed(1)}% goal-focused time`, 'success');
+                } else {
+                    contentDiv.innerHTML = '<p style="color: #FF4D4F; text-align: center;">Failed to optimize week</p>';
+                    showToast('❌ Failed to optimize weekly schedule', 'error');
+                }
+            } catch (error) {
+                console.error('Weekly optimization error:', error);
+                contentDiv.innerHTML = '<p style="color: #FF4D4F; text-align: center;">Error optimizing week</p>';
+                showToast('❌ Error optimizing week', 'error');
+            }
+        }
+        
+        function displayWeeklyOptimization(data) {
+            const contentDiv = document.getElementById('optimization-content');
+            const analysis = data.current_analysis;
+            
+            let html = `
+                <div style="margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="font-size: 11px; color: #8C8C8C;">Total Hours:</span>
+                        <span style="font-size: 11px; font-weight: 600; color: #262626;">${analysis.total_scheduled_hours}h</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="font-size: 11px; color: #8C8C8C;">Goal-Focused:</span>
+                        <span style="font-size: 11px; font-weight: 600; color: ${analysis.goal_percentage > 50 ? '#52C41A' : '#FF4D4F'};">${analysis.goal_percentage.toFixed(1)}%</span>
+                    </div>
+                    <div style="width: 100%; background: #F5F5F5; border-radius: 4px; height: 6px; margin-bottom: 12px;">
+                        <div style="width: ${analysis.goal_percentage}%; background: linear-gradient(90deg, #52C41A, #4A90E2); height: 100%; border-radius: 4px;"></div>
+                    </div>
+                </div>
+            `;
+            
+            // Optimization suggestions
+            if (data.optimization_suggestions && data.optimization_suggestions.length > 0) {
+                html += '<div style="margin-bottom: 12px;"><h5 style="font-size: 11px; color: #262626; margin-bottom: 6px;">💡 Suggestions:</h5>';
+                data.optimization_suggestions.forEach(suggestion => {
+                    html += `
+                        <div style="margin-bottom: 6px; padding: 6px; background: ${suggestion.impact === 'high' ? '#FFF7E6' : '#F6FFED'}; border-radius: 4px; border-left: 2px solid ${suggestion.impact === 'high' ? '#FA8C16' : '#52C41A'};">
+                            <div style="font-size: 11px; font-weight: 500; color: #262626;">${suggestion.title}</div>
+                            <div style="font-size: 10px; color: #8C8C8C; margin-top: 2px;">${suggestion.description}</div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            }
+            
+            contentDiv.innerHTML = html;
+        }
+        
+        // Goal-Based Scheduling
+        async function scheduleGoalTime() {
+            const resultsDiv = document.getElementById('goal-scheduling-results');
+            resultsDiv.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <div style="width: 12px; height: 12px; border: 2px solid #f3f3f3; border-top: 2px solid #4A90E2; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                    <span>Scheduling goal time blocks...</span>
+                </div>
+            `;
+            
+            try {
+                const response = await apiCall(`${backendUrl}/api/ai-calendar/bulk-schedule-from-goals?days_ahead=7`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    resultsDiv.innerHTML = `
+                        <div style="color: #52C41A;">
+                            ✅ Scheduled ${result.scheduled_events.length} goal sessions across ${result.goals_processed} goals
+                        </div>
+                    `;
+                    showToast(`🎯 Scheduled ${result.scheduled_events.length} goal work sessions!`, 'success');
+                    
+                    // Refresh calendar events
+                    loadCalendarEvents();
+                } else {
+                    resultsDiv.innerHTML = `<div style="color: #FF4D4F;">❌ ${result.message || 'Failed to schedule goals'}</div>`;
+                    showToast('❌ Failed to schedule goal time', 'error');
+                }
+            } catch (error) {
+                console.error('Schedule goal time error:', error);
+                resultsDiv.innerHTML = '<div style="color: #FF4D4F;">❌ Error scheduling goals</div>';
+                showToast('❌ Error scheduling goal time', 'error');
+            }
+        }
+        
+        // Enhanced Calendar Event Loading with AI Features
+        async function loadCalendarEvents() {
+            try {
+                const response = await apiCall(`${backendUrl}/api/calendar/events?user_id=1&days_ahead=7`);
+                const events = await response.json();
+                
+                updateCalendarWithEvents(events);
+                updateTodaySchedule(events);
+                
+            } catch (error) {
+                console.error('Load calendar events error:', error);
+            }
+        }
+        
+        function updateCalendarWithEvents(events) {
+            // Clear existing event indicators
+            document.querySelectorAll('.calendar-day').forEach(day => {
+                const existingIndicators = day.querySelectorAll('.event-indicator');
+                existingIndicators.forEach(indicator => indicator.remove());
+            });
+            
+            // Add event indicators
+            events.forEach(event => {
+                const eventDate = new Date(event.start_time);
+                const dayElement = document.querySelector(`[data-date="${eventDate.getDate()}"]`);
+                
+                if (dayElement) {
+                    const indicator = document.createElement('div');
+                    indicator.className = 'event-indicator';
+                    indicator.style.cssText = `
+                        width: 4px;
+                        height: 4px;
+                        background: ${event.contributes_to_goal ? '#52C41A' : '#4A90E2'};
+                        border-radius: 50%;
+                        margin: 1px auto;
+                    `;
+                    indicator.title = event.title;
+                    dayElement.appendChild(indicator);
+                }
+            });
+        }
+        
+        function updateTodaySchedule(events) {
+            const today = new Date();
+            const todayEvents = events.filter(event => {
+                const eventDate = new Date(event.start_time);
+                return eventDate.toDateString() === today.toDateString();
+            });
+            
+            const container = document.getElementById('calendar-events-container');
+            if (!container) return;
+            
+            if (todayEvents.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: #8C8C8C;">
+                        <p>No events today</p>
+                        <button onclick="generateHourlySchedule()" style="background: #4A90E2; color: white; border: none; border-radius: 6px; padding: 8px 16px; font-size: 12px; cursor: pointer; margin-top: 8px;">Generate AI Schedule</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '<div style="margin-top: 16px;"><h4 style="font-size: 14px; margin-bottom: 8px;">Today\'s Schedule</h4>';
+            
+            todayEvents.forEach(event => {
+                const startTime = new Date(event.start_time);
+                const timeStr = startTime.toLocaleTimeString('en-US', { 
+                    hour: 'numeric', 
+                    minute: '2-digit',
+                    hour12: true 
+                });
+                
+                html += `
+                    <div style="display: flex; align-items: center; padding: 8px; margin-bottom: 6px; background: #FAFAFA; border-radius: 6px; border-left: 3px solid ${event.contributes_to_goal ? '#52C41A' : '#4A90E2'};">
+                        <div style="min-width: 60px; font-size: 11px; font-weight: 600; color: #8C8C8C;">${timeStr}</div>
+                        <div style="flex: 1;">
+                            <div style="font-size: 13px; font-weight: 500; color: #262626;">${event.title}</div>
+                            <div style="font-size: 10px; color: #8C8C8C; margin-top: 2px;">${event.event_type} ${event.contributes_to_goal ? '• Goal-related' : ''}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
+</content>
+</invoke>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurora Life OS - Demo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #F5F7FA;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #4A90E2, #722ED1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin-bottom: 24px;
+        }
+        
+        .content h1 {
+            font-size: 28px;
+            color: #262626;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        
+        .content p {
+            color: #8C8C8C;
+            font-size: 16px;
+            margin-bottom: 32px;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            max-width: 600px;
+            width: 100%;
+            margin-bottom: 32px;
+        }
+        
+        .feature-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.2s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .feature-card h3 {
+            color: #262626;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        
+        .feature-card p {
+            color: #8C8C8C;
+            font-size: 14px;
+            margin: 0;
+        }
+        
+        .bottom-nav {
+            background: white;
+            border-top: 1px solid #D9D9D9;
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 60px;
+        }
+        
+        .nav-item:hover {
+            background: #F5F7FA;
+        }
+        
+        .nav-item.active {
+            color: #4A90E2;
+            background: rgba(74, 144, 226, 0.1);
+        }
+        
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 4px;
+            background: currentColor;
+            border-radius: 4px;
+            opacity: 0.8;
+        }
+        
+        .nav-label {
+            font-size: 10px;
+            font-weight: 500;
+        }
+        
+        .status {
+            background: #52C41A;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-top: 16px;
+        }
+        
+        @media (max-width: 480px) {
+            .main-content { padding: 20px; }
+            .content h1 { font-size: 24px; }
+            .features { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <div class="logo">🌟</div>
+        <div class="content">
+            <h1>Aurora Life OS</h1>
+            <p>Your AI-powered life companion is ready!</p>
+        </div>
+        
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon" style="background: rgba(74,144,226,0.1); color: #4A90E2;">💬</div>
+                <h3>AI Coaching</h3>
+                <p>Emotionally intelligent conversations with GPT-4o</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background: rgba(82,196,26,0.1); color: #52C41A;">📅</div>
+                <h3>Google Calendar</h3>
+                <p>OAuth integration for smart scheduling</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background: rgba(250,173,20,0.1); color: #FAAD14;">🎯</div>
+                <h3>Goal Tracking</h3>
+                <p>AI-powered goal breakdown and progress</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background: rgba(255,77,79,0.1); color: #FF4D4F;">💗</div>
+                <h3>Mood Analytics</h3>
+                <p>Burnout detection and wellness insights</p>
+            </div>
+        </div>
+        
+        <div class="status">✅ Backend API Running on Port 8000</div>
+    </div>
+    
+    <div class="bottom-nav">
+        <div class="nav-item active" data-tab="chat">
+            <div class="nav-icon"></div>
+            <div class="nav-label">Chat</div>
+        </div>
+        <div class="nav-item" data-tab="calendar">
+            <div class="nav-icon"></div>
+            <div class="nav-label">Calendar</div>
+        </div>
+        <div class="nav-item" data-tab="goals">
+            <div class="nav-icon"></div>
+            <div class="nav-label">Goals</div>
+        </div>
+        <div class="nav-item" data-tab="mood">
+            <div class="nav-icon"></div>
+            <div class="nav-label">Mood</div>
+        </div>
+        <div class="nav-item" data-tab="profile">
+            <div class="nav-icon"></div>
+            <div class="nav-label">Profile</div>
+        </div>
+    </div>
+    
+    <script>
+        // Tab navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // Remove active class from all items
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                // Add active class to clicked item
+                this.classList.add('active');
+                
+                // Update content based on tab
+                const tab = this.dataset.tab;
+                const content = document.querySelector('.content');
+                
+                switch(tab) {
+                    case 'chat':
+                        content.innerHTML = '<h1>💬 Aurora AI</h1><p>Emotionally intelligent coaching with GPT-4o</p>';
+                        break;
+                    case 'calendar':
+                        content.innerHTML = '<h1>📅 Smart Calendar</h1><p>Google Calendar integration with AI insights</p>';
+                        break;
+                    case 'goals':
+                        content.innerHTML = '<h1>🎯 Goals Dashboard</h1><p>AI-powered goal breakdown and tracking</p>';
+                        break;
+                    case 'mood':
+                        content.innerHTML = '<h1>💗 Mood Tracker</h1><p>Emotional wellbeing and burnout detection</p>';
+                        break;
+                    case 'profile':
+                        content.innerHTML = '<h1>👤 Profile Settings</h1><p>Google Calendar connection and preferences</p>';
+                        break;
+                }
+            });
+        });
+        
+        // Test backend connectivity
+        fetch('http://127.0.0.1:8000/health')
+            .then(response => response.json())
+            .then(data => {
+                console.log('✅ Backend connected:', data);
+            })
+            .catch(error => {
+                console.log('❌ Backend offline:', error);
+                document.querySelector('.status').textContent = '❌ Backend Offline';
+                document.querySelector('.status').style.background = '#FF4D4F';
+            });
+    </script>
+</body>
+</html>

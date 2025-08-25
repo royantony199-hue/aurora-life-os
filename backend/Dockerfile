@@ -35,8 +35,8 @@ RUN mkdir -p /app/uploads /app/logs /app/scripts \
 # Copy application code
 COPY --chown=appuser:appuser . .
 
-# Make migration script executable
-RUN chmod +x scripts/migrate_to_postgresql.py
+# Make scripts executable if they exist
+RUN if [ -d "scripts" ] && [ -f "scripts/migrate_to_postgresql.py" ]; then chmod +x scripts/migrate_to_postgresql.py; fi
 
 # Switch to non-root user
 USER appuser

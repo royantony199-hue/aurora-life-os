@@ -8,7 +8,9 @@
     "build": "vite build",
     "build-with-types": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "node server.js",
+    "start:simple": "node simple-server.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
@@ -56,7 +58,7 @@
     "react-hook-form": "^7.62.0",
     "react-resizable-panels": "^3.0.4",
     "recharts": "^3.1.2",
-    "http-server": "^14.1.1",
+    "express": "^4.18.2",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
     "vaul": "^1.1.2",

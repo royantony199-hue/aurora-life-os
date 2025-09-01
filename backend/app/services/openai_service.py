@@ -15,20 +15,30 @@ class OpenAIService:
     
     def _initialize_client(self):
         """Initialize or reinitialize the OpenAI client"""
-        # Try multiple sources for API key
-        api_key = os.getenv("OPENAI_API_KEY") or settings.openai_api_key
-        
-        # DEBUG: Check API key availability (no sensitive info logged)
-        has_env_key = bool(os.getenv('OPENAI_API_KEY'))
-        has_settings_key = bool(settings.openai_api_key)
-        print(f"DEBUG: Environment key available: {has_env_key}")
-        print(f"DEBUG: Settings key available: {has_settings_key}")
-        
-        if api_key and not api_key.startswith("sk-test-key-replace"):
-            print(f"DEBUG: Initializing OpenAI client with real key")
-            self.client = OpenAI(api_key=api_key)
-        else:
-            print("DEBUG: No valid OpenAI API key found")
+        try:
+            # Try multiple sources for API key
+            api_key = os.getenv("OPENAI_API_KEY") or settings.openai_api_key
+            
+            # DEBUG: Check API key availability (no sensitive info logged)
+            has_env_key = bool(os.getenv('OPENAI_API_KEY'))
+            has_settings_key = bool(settings.openai_api_key)
+            print(f"DEBUG: Environment key available: {has_env_key}")
+            print(f"DEBUG: Settings key available: {has_settings_key}")
+            
+            if api_key and not api_key.startswith("sk-test-key-replace"):
+                print(f"DEBUG: Initializing OpenAI client with real key")
+                try:
+                    self.client = OpenAI(api_key=api_key)
+                    print("DEBUG: OpenAI client initialized successfully")
+                except Exception as e:
+                    print(f"DEBUG: Failed to initialize OpenAI client: {e}")
+                    self.client = None
+            else:
+                print("DEBUG: No valid OpenAI API key found")
+                self.client = None
+        except Exception as e:
+            print(f"DEBUG: Failed to initialize OpenAI client: {str(e)}")
+            print("DEBUG: Continuing without OpenAI client - AI features will be disabled")
             self.client = None
     
     def reload_client(self):

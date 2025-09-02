@@ -32,6 +32,14 @@ const server = createServer((req, res) => {
     return;
   }
 
+  // Check if dist directory exists
+  if (!existsSync(DIST_DIR)) {
+    console.error(`ERROR: dist directory not found at ${DIST_DIR}`);
+    res.writeHead(500);
+    res.end('Build directory not found. Did the build complete?');
+    return;
+  }
+
   // Default to index.html for SPA routing
   let filePath = join(DIST_DIR, req.url === '/' ? 'index.html' : req.url);
   
@@ -69,4 +77,19 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Simple server running on http://0.0.0.0:${PORT}`);
   console.log(`📁 Serving files from: ${DIST_DIR}`);
   console.log(`🏠 Environment: ${process.env.NODE_ENV || 'development'}`);
+  
+  // Check if dist exists and what's in it
+  if (existsSync(DIST_DIR)) {
+    const files = require('fs').readdirSync(DIST_DIR);
+    console.log(`📂 Files in dist: ${files.join(', ')}`);
+    
+    // Check for index.html specifically
+    if (existsSync(join(DIST_DIR, 'index.html'))) {
+      console.log('✅ index.html found');
+    } else {
+      console.log('❌ index.html NOT found');
+    }
+  } else {
+    console.log('❌ dist directory does NOT exist!');
+  }
 });

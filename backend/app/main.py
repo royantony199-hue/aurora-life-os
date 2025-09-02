@@ -152,13 +152,13 @@ app.include_router(ai_calendar.router, prefix="/api/ai-calendar", tags=["ai-cale
 
 @app.get("/")
 async def root():
-    return {"message": f"Welcome to {settings.app_name}", "version": settings.version}
-
+    """Root endpoint"""
+    return {"message": "Aurora Life OS is running!", "status": "ok", "version": settings.version}
 
 @app.get("/health")
 async def health_check():
     """Basic health check endpoint"""
-    return {"status": "healthy", "timestamp": time.time()}
+    return {"status": "ok"}
 
 
 @app.get("/health/detailed")

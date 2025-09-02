@@ -78,6 +78,17 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`📁 Serving files from: ${DIST_DIR}`);
   console.log(`🏠 Environment: ${process.env.NODE_ENV || 'development'}`);
   
+  // Check current working directory and files
+  console.log(`📍 Current directory: ${process.cwd()}`);
+  console.log(`📁 Looking for dist at: ${DIST_DIR}`);
+  
+  try {
+    const rootFiles = require('fs').readdirSync('/app');
+    console.log(`📂 Files in /app: ${rootFiles.join(', ')}`);
+  } catch (e) {
+    console.log('❌ Cannot read /app directory');
+  }
+  
   // Check if dist exists and what's in it
   if (existsSync(DIST_DIR)) {
     const files = require('fs').readdirSync(DIST_DIR);
@@ -91,5 +102,18 @@ server.listen(PORT, '0.0.0.0', () => {
     }
   } else {
     console.log('❌ dist directory does NOT exist!');
+    
+    // Try to find where the build output might be
+    try {
+      const possiblePaths = ['/app/build', '/app/public', '/app/out'];
+      for (const path of possiblePaths) {
+        if (existsSync(path)) {
+          const files = require('fs').readdirSync(path);
+          console.log(`📂 Found alternative build dir at ${path}: ${files.join(', ')}`);
+        }
+      }
+    } catch (e) {
+      console.log('🔍 No alternative build directories found');
+    }
   }
 });
